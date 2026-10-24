@@ -4,9 +4,9 @@ from PIL import Image
 # إعدادات الصفحة
 st.set_page_config(page_title="NutriFoyer", page_icon="🥗", layout="centered")
 
-# تهيئة حالة الجلسة (Session State)
+# تهيئة حالة الجلسة (افتراضياً مسجل الدخول لكي يفتح التطبيق مباشرة)
 if 'logged_in' not in st.session_state:
-    st.session_state.logged_in = False
+    st.session_state.logged_in = True
 if 'user_name' not in st.session_state:
     st.session_state.user_name = "Marwan"
 if 'user_email' not in st.session_state:
@@ -49,7 +49,6 @@ st.markdown("""
         font-weight: 700;
         text-align: center;
     }
-    /* مربعات المكونات الغذائية الملونة */
     .metric-box-protein {
         background: #e3f2fd;
         border: 1px solid #90caf9;
@@ -89,40 +88,31 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- 1. شاشة تسجيل الدخول والبروفايل الأولي ---
-if not st.session_state.logged_in or st.session_state.edit_profile:
+# --- إذا قام المستخدم بالضغط على زر تعديل البروفايل ---
+if st.session_state.edit_profile:
     st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.markdown("<h2 class='header-title'>🌿 Bienvenue sur NutriFoyer</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #555;'>Connectez-vous pour configurer votre profil nutritionnel étudiant</p>", unsafe_allow_html=True)
+    st.markdown("<h2 class='header-title'>⚙️ Modifier le Profil</h2>", unsafe_allow_html=True)
     
-    if st.button("🔵 Connexion rapide avec Google (Gmail)"):
-        st.session_state.logged_in = True
-        st.session_state.edit_profile = False
-        st.rerun()
-        
-    st.markdown("---")
-    st.subheader("👤 Informations Personnelles & Profil")
+    st.session_state.user_name = st.text_input("Nom complet", st.session_state.user_name)
+    st.session_state.gender = st.selectbox("Sexe", ["Homme", "Femme"], index=0 if st.session_state.gender=="Homme" else 1)
+    st.session_state.age = st.number_input("Âge", 17, 40, st.session_state.age)
+    st.session_state.weight = st.number_input("Poids (kg)", 40, 150, st.session_state.weight)
+    st.session_state.height = st.number_input("Taille (cm)", 140, 200, st.session_state.height)
     
-    col1, col2 = st.columns(2)
-    with col1:
-        st.session_state.user_name = st.text_input("Nom complet", st.session_state.user_name)
-        st.session_state.gender = st.selectbox("Sexe", ["Homme", "Femme"], index=0 if st.session_state.gender=="Homme" else 1)
-        st.session_state.age = st.number_input("Âge", 17, 40, st.session_state.age)
-    with col2:
-        st.session_state.user_email = st.text_input("Email universitaire", st.session_state.user_email)
-        st.session_state.weight = st.number_input("Poids (kg)", 40, 150, st.session_state.weight)
-        st.session_state.height = st.number_input("Taille (cm)", 140, 200, st.session_state.height)
-        
-    if st.button("💾 Enregistrer et Commencer"):
-        st.session_state.logged_in = True
-        st.session_state.edit_profile = False
-        st.success("Profil configuré avec succès !")
-        st.rerun()
-        
+    col_e1, col_e2 = st.columns(2)
+    with col_e1:
+        if st.button("💾 Enregistrer"):
+            st.session_state.edit_profile = False
+            st.success("Profil mis à jour !")
+            st.rerun()
+    with col_e2:
+        if st.button("❌ Retour"):
+            st.session_state.edit_profile = False
+            st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
 else:
-    # --- التطبيق الرئيسي بعد تسجيل الدخول ---
+    # --- التطبيق الرئيسي يفتح مباشرة هنا ---
     
     top_col1, top_col2 = st.columns([4, 1])
     with top_col1:
@@ -143,17 +133,15 @@ else:
 
     tab_scanner, tab_restou = st.tabs(["📸 Scanner & Analyse du Plat", "🍽️ Menu Resto U & Plats"])
 
-    # --- قسم التصوير ورفع الصور والتحليل (محدث بالكامل حسب طلبك) ---
+    # --- قسم التصوير ورفع الصور والتحليل ---
     with tab_scanner:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
         st.subheader("📸 Analyse Intelligente par Photo")
         
-        # الحالة 3: إذا ظهر تحليل المعلومات (تختفي الصورة وأزرار الاختيار)
         if st.session_state.analysis_done:
             st.success("Analyse terminée avec succès !")
             st.markdown("### 📊 Résultats nutritionnels du plat :")
             
-            # عرض المكونات في مربعات ملونة بجانب بعضها
             col_m1, col_m2, col_m3 = st.columns(3)
             with col_m1:
                 st.markdown("""
@@ -199,7 +187,6 @@ else:
                 st.session_state.show_camera = False
                 st.rerun()
                 
-        # الحالة 2: عندما تصبح الصورة أمامك (تختفي أزرار الكاميرا والتحميل ويظهر زر التحليل)
         elif st.session_state.captured_image is not None:
             st.image(st.session_state.captured_image, use_column_width=True)
             
@@ -214,7 +201,6 @@ else:
                     st.session_state.show_camera = False
                     st.rerun()
                     
-        # الحالة 1: البداية (اختيار إما رفع صورة أو فتح الكاميرا بالضغط على الزر)
         else:
             st.write("Sélectionnez une option pour ajouter une photo :")
             
