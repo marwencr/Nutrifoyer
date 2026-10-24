@@ -19,10 +19,16 @@ if 'weight' not in st.session_state:
     st.session_state.weight = 70
 if 'height' not in st.session_state:
     st.session_state.height = 175
-if 'avatar' not in st.session_state:
-    st.session_state.avatar = None
 if 'edit_profile' not in st.session_state:
     st.session_state.edit_profile = False
+
+# حالات الماسح الضوئي والصورة
+if 'captured_image' not in st.session_state:
+    st.session_state.captured_image = None
+if 'show_camera' not in st.session_state:
+    st.session_state.show_camera = False
+if 'analysis_done' not in st.session_state:
+    st.session_state.analysis_done = False
 
 # تصميم واجهة مستوحاة من الطبيعة واللون الأخضر الصحي
 st.markdown("""
@@ -41,6 +47,28 @@ st.markdown("""
     .header-title {
         color: #1b5e20;
         font-weight: 700;
+        text-align: center;
+    }
+    /* مربعات المكونات الغذائية الملونة */
+    .metric-box-protein {
+        background: #e3f2fd;
+        border: 1px solid #90caf9;
+        border-radius: 14px;
+        padding: 15px;
+        text-align: center;
+    }
+    .metric-box-carbs {
+        background: #fff3e0;
+        border: 1px solid #ffe0b2;
+        border-radius: 14px;
+        padding: 15px;
+        text-align: center;
+    }
+    .metric-box-fats {
+        background: #e8f5e9;
+        border: 1px solid #c8e6c9;
+        border-radius: 14px;
+        padding: 15px;
         text-align: center;
     }
     .stButton>button {
@@ -67,7 +95,6 @@ if not st.session_state.logged_in or st.session_state.edit_profile:
     st.markdown("<h2 class='header-title'>🌿 Bienvenue sur NutriFoyer</h2>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: #555;'>Connectez-vous pour configurer votre profil nutritionnel étudiant</p>", unsafe_allow_html=True)
     
-    # زر محاكاة تسجيل الدخول بالجميل
     if st.button("🔵 Connexion rapide avec Google (Gmail)"):
         st.session_state.logged_in = True
         st.session_state.edit_profile = False
@@ -86,10 +113,6 @@ if not st.session_state.logged_in or st.session_state.edit_profile:
         st.session_state.weight = st.number_input("Poids (kg)", 40, 150, st.session_state.weight)
         st.session_state.height = st.number_input("Taille (cm)", 140, 200, st.session_state.height)
         
-    uploaded_avatar = st.file_uploader("📷 Ajouter une photo de profil (Avatar)", type=["jpg", "png", "jpeg"])
-    if uploaded_avatar is not None:
-        st.session_state.avatar = uploaded_avatar
-        
     if st.button("💾 Enregistrer et Commencer"):
         st.session_state.logged_in = True
         st.session_state.edit_profile = False
@@ -101,7 +124,6 @@ if not st.session_state.logged_in or st.session_state.edit_profile:
 else:
     # --- التطبيق الرئيسي بعد تسجيل الدخول ---
     
-    # شريط علوي مع زر دائري صغير للبروفايل في الزاوية
     top_col1, top_col2 = st.columns([4, 1])
     with top_col1:
         st.markdown("<h2 style='color: #1b5e20; margin: 0;'>🥗 NutriFoyer</h2>", unsafe_allow_html=True)
@@ -113,69 +135,111 @@ else:
 
     st.markdown("---")
 
-    # حساب السعرات الأساسية BMR
     w = st.session_state.weight
     h = st.session_state.height
     a = st.session_state.age
     g = st.session_state.gender
     bmr = (10 * w) + (6.25 * h) - (5 * a) + (5 if g == "Homme" else -161)
 
-    # الأقسام الرئيسية (التبويبات الواضحة)
     tab_scanner, tab_restou = st.tabs(["📸 Scanner & Analyse du Plat", "🍽️ Menu Resto U & Plats"])
 
-    # --- قسم التصوير ورفع الصور والتحليل ---
+    # --- قسم التصوير ورفع الصور والتحليل (محدث بالكامل حسب طلبك) ---
     with tab_scanner:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
         st.subheader("📸 Analyse Intelligente par Photo")
-        st.write("Sélectionnez une option ci-dessous pour importer ou prendre en photo votre plateau :")
         
-        # زرين على شكل مربع بألوان محددة
-        c_box1, c_box2 = st.columns(2)
-        with c_box1:
+        # الحالة 3: إذا ظهر تحليل المعلومات (تختفي الصورة وأزرار الاختيار)
+        if st.session_state.analysis_done:
+            st.success("Analyse terminée avec succès !")
+            st.markdown("### 📊 Résultats nutritionnels du plat :")
+            
+            # عرض المكونات في مربعات ملونة بجانب بعضها
+            col_m1, col_m2, col_m3 = st.columns(3)
+            with col_m1:
+                st.markdown("""
+                    <div class="metric-box-protein">
+                        <div style="font-size: 13px; color: #1565c0; font-weight: bold;">Protéines</div>
+                        <div style="font-size: 22px; color: #0d47a1; font-weight: bold;">24g</div>
+                        <div style="font-size: 11px; color: #1976d2;">Optimal</div>
+                    </div>
+                """, unsafe_allow_html=True)
+            with col_m2:
+                st.markdown("""
+                    <div class="metric-box-carbs">
+                        <div style="font-size: 13px; color: #e65100; font-weight: bold;">Glucides</div>
+                        <div style="font-size: 22px; color: #bf360c; font-weight: bold;">62g</div>
+                        <div style="font-size: 11px; color: #f57c00;">Énergie</div>
+                    </div>
+                """, unsafe_allow_html=True)
+            with col_m3:
+                st.markdown("""
+                    <div class="metric-box-fats">
+                        <div style="font-size: 13px; color: #2e7d32; font-weight: bold;">Lipides</div>
+                        <div style="font-size: 22px; color: #1b5e20; font-weight: bold;">12g</div>
+                        <div style="font-size: 11px; color: #388e3c;">Équilibré</div>
+                    </div>
+                """, unsafe_allow_html=True)
+            
+            st.markdown("---")
+            st.markdown("🎯 **Indice de compatibilité avec votre profil :**")
             st.markdown("""
-                <div style='background: #e8f5e9; padding: 12px; border-radius: 12px; text-align: center; border: 2px dashed #4caf50; margin-bottom: 8px;'>
-                    <span style='color: #2e7d32; font-weight: bold;'>📁 Importer une image</span>
+                <div style='background: #f1f3f4; border-radius: 10px; padding: 5px; margin-top: 8px;'>
+                    <div style='height: 18px; border-radius: 8px; background: linear-gradient(90deg, #ff5252 0%, #ffd740 33%, #69f0ae 66%, #2196f3 100%); width: 95%;'></div>
+                </div>
+                <div style='display: flex; justify-content: space-between; font-size: 11px; color: #555; margin-top: 4px;'>
+                    <span>Inadapté</span><span>Moyen</span><span>Bon</span><span style='color: #2196f3; font-weight: bold;'>Parfaitement Adapté (95%)</span>
                 </div>
             """, unsafe_allow_html=True)
-            uploaded_file = st.file_uploader("", type=["jpg", "jpeg", "png"], key="up_file")
             
-        with c_box2:
-            st.markdown("""
-                <div style='background: #e0f2f1; padding: 12px; border-radius: 12px; text-align: center; border: 2px dashed #00897b; margin-bottom: 8px;'>
-                    <span style='color: #00695c; font-weight: bold;'>📷 Prendre une photo</span>
-                </div>
-            """, unsafe_allow_html=True)
-            camera_file = st.camera_input("", key="cam_file")
+            st.info(f"💡 **Conseil NutriFoyer :** Votre besoin énergétique est de {int(bmr)} kcal/jour. Ce repas correspond parfaitement à votre morphologie et profil !")
             
-        image = uploaded_file if uploaded_file else camera_file
-        
-        if image is not None:
-            st.image(image, use_column_width=True)
+            if st.button("🔄 Analyser un autre plat"):
+                st.session_state.captured_image = None
+                st.session_state.analysis_done = False
+                st.session_state.show_camera = False
+                st.rerun()
+                
+        # الحالة 2: عندما تصبح الصورة أمامك (تختفي أزرار الكاميرا والتحميل ويظهر زر التحليل)
+        elif st.session_state.captured_image is not None:
+            st.image(st.session_state.captured_image, use_column_width=True)
             
-            # زر التحليل بالذكاء الاصطناعي تحت الصورة مباشرة
-            if st.button("🚀 Lancer l'analyse IA de la وجبة"):
-                with st.spinner("Analyse des macronutriments en cours..."):
-                    st.success("Analyse terminée !")
+            c_btn1, c_btn2 = st.columns(2)
+            with c_btn1:
+                if st.button("🚀 Lancer l'analyse IA"):
+                    st.session_state.analysis_done = True
+                    st.rerun()
+            with c_btn2:
+                if st.button("❌ Changer l'image"):
+                    st.session_state.captured_image = None
+                    st.session_state.show_camera = False
+                    st.rerun()
                     
-                    mc1, mc2, mc3 = st.columns(3)
-                    mc1.metric("Protéines", "24g", "Optimal")
-                    mc2.metric("Glucides", "62g", "Énergie")
-                    mc3.metric("Lipides", "12g", "Équilibré")
+        # الحالة 1: البداية (اختيار إما رفع صورة أو فتح الكاميرا بالضغط على الزر)
+        else:
+            st.write("Sélectionnez une option pour ajouter une photo :")
+            
+            uploaded_file = st.file_uploader("Importer une image depuis l'appareil", type=["jpg", "jpeg", "png"])
+            if uploaded_file is not None:
+                st.session_state.captured_image = uploaded_file
+                st.rerun()
+            
+            st.markdown("<div style='text-align: center; margin: 10px 0; color: #666;'>— OU —</div>", unsafe_allow_html=True)
+            
+            if not st.session_state.show_camera:
+                if st.button("📷 Ouvrir la caméra"):
+                    st.session_state.show_camera = True
+                    st.rerun()
+            else:
+                st.markdown("### Prenez la photo :")
+                camera_file = st.camera_input("Prendre une photo")
+                if camera_file is not None:
+                    st.session_state.captured_image = camera_file
+                    st.session_state.show_camera = False
+                    st.rerun()
+                if st.button("Fermer la caméra"):
+                    st.session_state.show_camera = False
+                    st.rerun()
                     
-                    st.markdown("---")
-                    st.markdown("🎯 **Indice de compatibilité avec votre profil :**")
-                    
-                    # مؤشر يتدرج من الأحمر والأصفر والأخضر إلى الأزرق (الأزرق الممتلئ يعني الأنسب تماماً لبروفايلك)
-                    st.markdown("""
-                        <div style='background: #f1f3f4; border-radius: 10px; padding: 5px; margin-top: 8px;'>
-                            <div style='height: 18px; border-radius: 8px; background: linear-gradient(90deg, #ff5252 0%, #ffd740 33%, #69f0ae 66%, #2196f3 100%); width: 95%;'></div>
-                        </div>
-                        <div style='display: flex; justify-content: space-between; font-size: 11px; color: #555; margin-top: 4px;'>
-                            <span>🔴 Inadapté</span><span>🟡 Moyen</span><span>🟢 Bon</span><span style='color: #2196f3; font-weight: bold; font-size: 12px;'>🔵 Parfaitement Adapté (95%)</span>
-                        </div>
-                    """, unsafe_allow_html=True)
-                    
-                    st.info(f"💡 **Conseil NutriFoyer :** Votre besoin énergétique est de **{int(bmr)} kcal/jour**. Ce repas correspond parfaitement à votre morphologie, âge et niveau d'activité !")
         st.markdown("</div>", unsafe_allow_html=True)
 
     # --- قسم المطعم الجامعي (Resto U) ---
@@ -185,24 +249,24 @@ else:
         st.write("Composez et évaluez votre plateau avec les menus tunisiens officiels :")
         
         plat = st.selectbox("Plat principal :", [
-            "Couscous aux légumes (كسكسي بالخضر)", 
-            "Couscous à la viande (كسكسي باللحم)", 
-            "Couscous au poulet (كسكسي بالدجاج)", 
-            "Ragoût de légumes (مرقة خضر)", 
-            "Poulet rôti / M'salli (دجاج مصلي)", 
-            "Poisson grillé (حوت مشوي)", 
-            "Ragoût de lentilles (مرقة عدس)", 
-            "Loubia / Haricots blancs (لوبيا)", 
-            "Pâtes / Spaghettis (مقرونة)"
+            "Couscous aux légumes", 
+            "Couscous à la viande", 
+            "Couscous au poulet", 
+            "Ragoût de légumes", 
+            "Poulet rôti / M'salli", 
+            "Poisson grillé", 
+            "Ragoût de lentilles", 
+            "Loubia / Haricots blancs", 
+            "Pâtes / Spaghettis"
         ])
         
         supp = st.multiselect("Entrées et Suppléments :", [
-            "Salade verte (سلاطة خضراء)", 
-            "Salade Mechouia (سلاطة مشوية)", 
-            "Fromage (جبن)", 
-            "Deux œufs durs (بيضتين مسلوقتين)", 
-            "Yaourt (كعبة ياغورت)", 
-            "Jus de fruit (باكو عصير)"
+            "Salade verte", 
+            "Salade Mechouia", 
+            "Fromage", 
+            "Deux œufs durs", 
+            "Yaourt", 
+            "Jus de fruit"
         ])
         
         if st.button("📊 Évaluer ce plateau Resto U"):
@@ -211,5 +275,5 @@ else:
                 st.markdown("### 📋 Résultat de l'analyse Resto U :")
                 st.progress(92)
                 st.write("Score nutritionnel : **92% - Excellent choix pour votre santé !**")
-                st.success("✅ Ce menu fournit l'apport nécessaire en vitamines et protéines pour vos cours.")
+                st.success("Ce menu fournit l'apport nécessaire en vitamines et protéines pour vos cours.")
         st.markdown("</div>", unsafe_allow_html=True)
