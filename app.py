@@ -9,25 +9,33 @@ st.set_page_config(page_title="NutriFoyer", page_icon="🥗", layout="centered")
 # --- تهيئة حالة الثيم (الوضع المظلم / الفاتح) أولاً ---
 if 'dark_mode' not in st.session_state: st.session_state.dark_mode = False
 
-# --- تطبيق CSS الديناميكي حسب حالة الثيم المختارة ---
+# --- تطبيق CSS الديناميكي المتقدم مع ألوان مخصصة لكل عنصر تغذية ---
 if st.session_state.dark_mode:
     bg_gradient = "linear-gradient(135deg, #0f1f17 0%, #1a2e22 100%)"
     card_bg = "#1e2923"
     card_border = "#2e7d32"
-    text_color = "#e2e8f0"
-    metric_bg = "#16221c"
-    metric_border = "#334155"
+    text_color = "#f1f5f9"
     action_bg = "#16221c"
     action_border = "#4caf50"
+    # ألوان مربعات المغذيات للوضع الداكن (خلفية داكنة مع نص زاهي وواضح)
+    box_prot = "background: #1a2332; border: 1px solid #1e88e5; color: #90caf9;"
+    box_carb = "background: #331f19; border: 1px solid #fb8c00; color: #ffb74d;"
+    box_fat  = "background: #1c2e1f; border: 1px solid #43a047; color: #81c784;"
+    box_fib  = "background: #281c32; border: 1px solid #8e24aa; color: #ce93d8;"
+    box_vit  = "background: #142823; border: 1px solid #00897b; color: #80cbc4;"
 else:
     bg_gradient = "linear-gradient(135deg, #f1f8f5 0%, #e2f0ea 100%)"
     card_bg = "#ffffff"
     card_border = "#c8e6c9"
     text_color = "#1f2937"
-    metric_bg = "#f8f9fa"
-    metric_border = "#d0d7de"
     action_bg = "#f4fbf7"
     action_border = "#81c784"
+    # ألوان مربعات المغذيات للوضع الفاتح (خلفية فاتحة مع نص وتصميم احترافي)
+    box_prot = "background: #e3f2fd; border: 1px solid #90caf9; color: #0d47a1;"
+    box_carb = "background: #fff3e0; border: 1px solid #ffb74d; color: #e65100;"
+    box_fat  = "background: #e8f5e9; border: 1px solid #a5d6a7; color: #1b5e20;"
+    box_fib  = "background: #f3e5f5; border: 1px solid #ce93d8; color: #4a148c;"
+    box_vit  = "background: #e0f2f1; border: 1px solid #80cbc4; color: #004d40;"
 
 st.markdown(f"""
     <style>
@@ -49,14 +57,6 @@ st.markdown(f"""
         color: {text_color} !important;
         border-radius: 14px;
         padding: 12px;
-        text-align: center;
-    }}
-    .metric-box {{
-        background: {metric_bg} !important;
-        border: 1px solid {metric_border} !important;
-        color: {text_color} !important;
-        border-radius: 10px;
-        padding: 8px;
         text-align: center;
     }}
     .tip-box-green {{
@@ -116,7 +116,7 @@ if 'captured_image' not in st.session_state: st.session_state.captured_image = N
 if 'show_camera' not in st.session_state: st.session_state.show_camera = False
 if 'analysis_done' not in st.session_state: st.session_state.analysis_done = False
 if 'nutrients' not in st.session_state: st.session_state.nutrients = {}
-if 'learning_counter' not in st.session_state: st.session_state.learning_counter = 1430
+if 'learning_counter' not in st.session_state: st.session_state.learning_counter = 1435
 
 if 'show_rating_page' not in st.session_state: st.session_state.show_rating_page = False
 if 'rating_success' not in st.session_state: st.session_state.rating_success = False
@@ -148,14 +148,13 @@ if st.session_state.edit_profile:
     st.markdown("</div>", unsafe_allow_html=True)
 
 else:
-    # --- الواجهة الرئيسة مع أزرار التحكم العلوية (الوضع المظلم + البروفايل) ---
+    # --- الواجهة الرئيسة مع أزرار التحكم العلوية ---
     top_col1, top_col_theme, top_col_settings = st.columns([3, 1, 1])
     with top_col1:
-        st.markdown("<h3 style='margin: 0;'>🥗 NutriFoyer <span style='font-size:11px; color:#4caf50;'>v4.0</span></h3>", unsafe_allow_html=True)
-        st.markdown(f"<p style='font-size: 11px; margin: 0;'>IA entraînée sur {st.session_state.learning_counter} repas</p>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='margin: 0; color: {text_color};'>🥗 NutriFoyer <span style='font-size:11px; color:#4caf50;'>v4.2</span></h3>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-size: 11px; margin: 0; color: {text_color}; opacity: 0.8;'>IA entraînée sur {st.session_state.learning_counter} repas</p>", unsafe_allow_html=True)
     
     with top_col_theme:
-        # زر تبديل الوضع المظلم / الفاتح
         theme_icon = "☀️" if st.session_state.dark_mode else "🌙"
         if st.button(theme_icon, help="Changer le mode d'affichage"):
             st.session_state.dark_mode = not st.session_state.dark_mode
@@ -167,11 +166,6 @@ else:
             st.rerun()
 
     st.markdown("---")
-
-    w = st.session_state.weight
-    h = st.session_state.height
-    a = st.session_state.age
-    g = st.session_state.gender
 
     tab_scanner, tab_feedback = st.tabs(["📸 Scanner & Analyse", "📊 Satisfaction Resto U"])
 
@@ -229,7 +223,7 @@ else:
                 st.session_state.show_rating_page = False
                 st.rerun()
 
-        # ب: عرض نتائج التحليل الدقيق
+        # ب: عرض نتائج التحليل الدقيق مع الألوان المميزة لكل عنصر
         elif st.session_state.analysis_done:
             st.markdown("<h4>📊 Analyse IA Détaillée (Plat complet)</h4>", unsafe_allow_html=True)
             if st.session_state.rating_success:
@@ -247,19 +241,20 @@ else:
             
             st.markdown(f"<p style='font-size:12px;'>🔍 <b>Composants détectés :</b> {detected_items}</p>", unsafe_allow_html=True)
             
+            # عرض عناصر المغذيات بألوان مخصصة ومميزة لكل عنصر
             m1, m2, m3 = st.columns(3)
             with m1:
-                st.markdown(f"""<div class="metric-box"><div style="font-size:10px; font-weight:bold;">Protéines</div><div style="font-size:15px; font-weight:bold;">{p_val}g</div></div>""", unsafe_allow_html=True)
+                st.markdown(f"""<div style="{box_prot}; border-radius: 10px; padding: 8px; text-align: center;"><div style="font-size:10px; font-weight:bold;">Protéines</div><div style="font-size:15px; font-weight:bold;">{p_val}g</div></div>""", unsafe_allow_html=True)
             with m2:
-                st.markdown(f"""<div class="metric-box"><div style="font-size:10px; font-weight:bold;">Glucides</div><div style="font-size:15px; font-weight:bold;">{c_val}g</div></div>""", unsafe_allow_html=True)
+                st.markdown(f"""<div style="{box_carb}; border-radius: 10px; padding: 8px; text-align: center;"><div style="font-size:10px; font-weight:bold;">Glucides</div><div style="font-size:15px; font-weight:bold;">{c_val}g</div></div>""", unsafe_allow_html=True)
             with m3:
-                st.markdown(f"""<div class="metric-box"><div style="font-size:10px; font-weight:bold;">Lipides</div><div style="font-size:15px; font-weight:bold;">{f_val}g</div></div>""", unsafe_allow_html=True)
+                st.markdown(f"""<div style="{box_fat}; border-radius: 10px; padding: 8px; text-align: center;"><div style="font-size:10px; font-weight:bold;">Lipides</div><div style="font-size:15px; font-weight:bold;">{f_val}g</div></div>""", unsafe_allow_html=True)
                 
             m4, m5 = st.columns(2)
             with m4:
-                st.markdown(f"""<div class="metric-box"><div style="font-size:10px; font-weight:bold;">Fibres</div><div style="font-size:15px; font-weight:bold;">{fib_val}g</div></div>""", unsafe_allow_html=True)
+                st.markdown(f"""<div style="{box_fib}; border-radius: 10px; padding: 8px; text-align: center;"><div style="font-size:10px; font-weight:bold;">Fibres</div><div style="font-size:15px; font-weight:bold;">{fib_val}g</div></div>""", unsafe_allow_html=True)
             with m5:
-                st.markdown(f"""<div class="metric-box"><div style="font-size:10px; font-weight:bold;">Vitamines</div><div style="font-size:15px; font-weight:bold;">{vit_val}%</div></div>""", unsafe_allow_html=True)
+                st.markdown(f"""<div style="{box_vit}; border-radius: 10px; padding: 8px; text-align: center;"><div style="font-size:10px; font-weight:bold;">Vitamines</div><div style="font-size:15px; font-weight:bold;">{vit_val}%</div></div>""", unsafe_allow_html=True)
             
             st.markdown("---")
             st.markdown(f"🎯 **Indice de compatibilité profil :** **{score}%**")
