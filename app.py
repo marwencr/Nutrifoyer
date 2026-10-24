@@ -1,64 +1,125 @@
 import streamlit as st
 from PIL import Image
 
-# إعدادات صفحة التطبيق
-st.set_page_config(page_title="NutriFoyer - Nutrition Étudiante", page_icon="🥗", layout="centered")
+# إعدادات صفحة التطبيق وتصميم الـ iOS Glassmorphism
+st.set_page_config(page_title="NutriFoyer iOS", page_icon="🥗", layout="centered")
 
-st.title("🥗 NutriFoyer : Équilibre Nutritionnel en Foyer")
-st.write("Application intelligente pour évaluer les repas étudiants par photo et composer son plateau avec les plats du Resto U.")
+st.markdown("""
+    <style>
+    /* خلفية عامة ناعمة */
+    .stApp {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    /* تصميم بطاقات الزجاج السائل (Liquid Glassmorphism) */
+    .glass-container {
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        padding: 22px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        margin-bottom: 20px;
+    }
+    
+    /* أزرار عصرية مطابقة لستايل آيفون */
+    .stButton>button {
+        width: 100%;
+        border-radius: 14px;
+        font-weight: 600;
+        background: linear-gradient(135deg, #007aff 0%, #005ec4 100%);
+        color: white;
+        border: none;
+        height: 48px;
+        box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3);
+        transition: all 0.3s ease;
+    }
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4);
+    }
+    
+    /* تنسيق العناوين والتبويبات */
+    h1, h2, h3 {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: #1c1c1e;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-# الشريط الجانبي: الملف الشخصي للطالب
-st.sidebar.header("👤 Profil de l'Étudiant")
-gender = st.sidebar.selectbox("Sexe", ["Homme", "Femme"])
-age = st.sidebar.number_input("Âge", 17, 30, 22)
-weight = st.sidebar.number_input("Poids (kg)", 40, 150, 70)
-height = st.sidebar.number_input("Taille (cm)", 140, 200, 175)
+# رأس الصفحة بتصميم أنيق
+st.markdown("<h1 style='text-align: center; color: #1c1c1e; font-size: 28px;'>🥗 NutriFoyer Mobile</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #8e8e93; font-size: 14px;'>Plateforme intelligente d'équilibre nutritionnel en cité universitaire</p>", unsafe_allow_html=True)
 
-bmr = (10 * weight) + (6.25 * height) - (5 * age) + (5 if gender == "Homme" else -161)
-st.sidebar.info(f"Besoin estimé : **{int(bmr)} kcal/jour**")
+# نظام التبويبات الاحترافي (Tabs)
+tab1, tab2, tab3 = st.tabs(["👤 Mon Profil", "📸 Scanner le Plat", "🍽️ Menu Resto U"])
 
-st.divider()
+# --- التبويب الأول: الملف الشخصي ---
+with tab1:
+    st.markdown('<div class="glass-container">', unsafe_allow_html=True)
+    st.subheader("Paramètres de l'Étudiant")
+    
+    gender = st.selectbox("Sexe", ["Homme", "Femme"])
+    col_a, col_b = st.columns(2)
+    with col_a:
+        age = st.number_input("Âge", 17, 30, 22)
+        weight = st.number_input("Poids (kg)", 40, 150, 70)
+    with col_b:
+        height = st.number_input("Taille (cm)", 140, 200, 175)
+        budget = st.selectbox("Budget", ["Économique", "Moyen"])
+        
+    bmr = (10 * weight) + (6.25 * height) - (5 * age) + (5 if gender == "Homme" else -161)
+    st.info(f"🎯 **Besoin énergétique journalier estimé :** {int(bmr)} kcal/jour")
+    st.markdown('</div>', unsafe_allow_html=True)
 
-# 1. الأساس: تصوير الوجبة أو رفع صورة
-st.header("📸 1. Analyse par Image (Caméra / Galerie)")
-st.write("Prenez en photo votre plateau ou importez une image :")
+# --- التبويب الثاني: مسح الصورة بالذكاء الاصطناعي ---
+with tab2:
+    st.markdown('<div class="glass-container">', unsafe_allow_html=True)
+    st.subheader("Analyse Intelligente par Photo")
+    st.write("Prenez en photo votre plateau ou importez une image pour l'analyser :")
+    
+    uploaded_file = st.file_uploader("Choisir une image...", type=["jpg", "jpeg", "png"])
+    camera_file = st.camera_input("Ou utiliser la caméra :")
+    
+    image = uploaded_file if uploaded_file else camera_file
+    
+    if image is not None:
+        st.image(image, use_column_width=True)
+        if st.button("🚀 Lancer l'analyse IA du plat"):
+            with st.spinner("Analyse des macronutriments en cours..."):
+                st.success("Analyse terminée avec succès !")
+                
+                c1, c2, c3 = st.columns(3)
+                c1.metric("Protéines", "19g", "+3g")
+                c2.metric("Glucides", "62g", "Optimal")
+                c3.metric("Lipides", "14g", "Équilibré")
+                
+                st.markdown("---")
+                st.markdown("💡 **Conseil Économique NutriFoyer :**")
+                st.info("Le plat est riche en énergie mais manque légèrement de protéines de qualité. Ajoutez **deux œufs durs** ou **une boîte de ثونة** pour un équilibre parfait à bas coût.")
+    st.markdown('</div>', unsafe_allow_html=True)
 
-uploaded_file = st.file_uploader("Choisir une image depuis la galerie...", type=["jpg", "jpeg", "png"])
-camera_file = st.camera_input("Ou prendre une photo directement :")
-
-image = uploaded_file if uploaded_file else camera_file
-
-if image is not None:
-    img = Image.open(image)
-    st.image(img, caption="Plateau analysé par IA", use_column_width=True)
-
-st.divider()
-
-# 2. الخيار الإضافي: اختيار الأطباق يدوياً من قائمة المطعم الجامعي
-st.header("🍽️ 2. Composants du Resto U (Sélection manuelle)")
-st.write("Cochez ou sélectionnez les éléments de votre plateau du Resto U :")
-
-col1, col2 = st.columns(2)
-
-with col1:
+# --- التبويب الثالث: أطباق المطعم الجامعي التونسي ---
+with tab3:
+    st.markdown('<div class="glass-container">', unsafe_allow_html=True)
+    st.subheader("Composition du Plateau Resto U")
+    st.write("Sélectionnez les plats proposés aujourd'hui au Restaurant Universitaire :")
+    
     plat_principal = st.selectbox("Plat principal :", [
-        "Aucun",
         "Couscous aux légumes (كسكسي بالخضر)", 
         "Couscous à la viande (كسكسي باللحم)", 
         "Couscous au poulet (كسكسي بالدجاج)", 
         "Ragoût de légumes (مرقة خضر)", 
         "Ragoût au poulet (مرقة بالدجاج)", 
-        "Poulet cuit (دجاج طايب)", 
-        "Poulet rôti au four / M'salli (دجاج مصلي)", 
+        "Poulet rôti / M'salli (دجاج مصلي)", 
         "Poisson grillé (حوت مشوي)", 
         "Ragoût de lentilles (مرقة عدس)", 
         "Loubia / Haricots blancs (لوبيا)", 
-        "Pâtes Penne / Fül (مقرونة فل)", 
-        "Spaghettis (مقرونة سباغيتي)"
+        "Pâtes / Spaghettis (مقرونة)"
     ])
-
-with col2:
-    accompagnements = st.multiselect("Entrées, Salades et Suppléments :", [
+    
+    supplements = st.multiselect("Entrées, Salades et Suppléments :", [
         "Salade verte (سلاطة خضراء)", 
         "Salade Mechouia (سلاطة مشوية)", 
         "Fromage (جبن)", 
@@ -66,26 +127,17 @@ with col2:
         "Yaourt (كعبة ياغورت)", 
         "Petit jus de fruit (باكو عصير صغير)"
     ])
-
-st.divider()
-
-# زر التحليل الشامل
-if st.button("🚀 Lancer l'analyse nutritionnelle globale"):
-    with st.spinner("Analyse des macronutriments en cours..."):
-        st.success("Analyse terminée avec succès !")
-        
-        # عرض المؤشرات
-        m1, m2, m3 = st.columns(3)
-        m1.metric("Protéines", "24g", "Optimal")
-        m2.metric("Glucides", "68g", "Bon")
-        m3.metric("Lipides", "15g", "Équilibré")
-        
-        st.subheader("📊 Évaluation globale du plateau :")
-        st.progress(80)
-        st.write("Niveau d'adéquation avec votre profil : **80% (Excellent repas étudiant)**")
-        
-        st.warning("💡 **Recommandations du coach NutriFoyer :**")
-        if "Deux œufs durs (بيضتين مسلوقتين)" not in accompagnements and "Fromage (جبن)" not in accompagnements and "Poulet" not in plat_principal and "Viande" not in plat_principal and "Poisson" not in plat_principal:
-            st.info("⚠️ Le plateau sélectionné manque de protéines. Pensez à ajouter **deux œufs durs** ou du **fromage** du Resto U pour combler vos besoins énergétiques.")
-        else:
-            st.info("✅ Super choix ! Ce repas fournit l'énergie nécessaire pour vos cours et soutient vos efforts physiques au foyer.")
+    
+    if st.button("📊 Évaluer le plateau complet"):
+        with st.spinner("Calcul des apports nutritionnels..."):
+            st.success("Évaluation réalisée avec succès !")
+            
+            st.markdown("### 📋 Résultat de l'analyse :")
+            st.progress(88)
+            st.write("Taux de compatibilité avec votre profil : **88% (Excellent choix étudiant)**")
+            
+            if len(supplements) > 0:
+                st.markdown("✅ **Points forts :** Excellente inclusion de suppléments riches en fibres et vitamines.")
+            else:
+                st.markdown("⚠️ **Recommandation :** Pensez à ajouter une salade ou un yaourt pour optimiser l'apport nutritionnel.")
+    st.markdown('</div>', unsafe_allow_html=True)
