@@ -44,7 +44,7 @@ if 'lunch_ratings' not in st.session_state:
 if 'dinner_ratings' not in st.session_state:
     st.session_state.dinner_ratings = [4, 3, 5, 4, 4]
 
-# تصميم الواجهة الاحترافية
+# تصميم الواجهة الاحترافية والمؤشر الملون
 st.markdown("""
     <style>
     .stApp {
@@ -71,6 +71,33 @@ st.markdown("""
         border-radius: 10px;
         padding: 8px;
         text-align: center;
+    }
+    .tip-box-green {
+        background: #e8f5e9;
+        border-left: 5px solid #2e7d32;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        font-size: 13px;
+        color: #1b5e20;
+    }
+    .tip-box-orange {
+        background: #fff3e0;
+        border-left: 5px solid #ef6c00;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        font-size: 13px;
+        color: #e65100;
+    }
+    .tip-box-blue {
+        background: #e3f2fd;
+        border-left: 5px solid #1565c0;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        font-size: 13px;
+        color: #0d47a1;
     }
     .stButton>button {
         width: 100%;
@@ -131,10 +158,9 @@ else:
     g = st.session_state.gender
     bmr = (10 * w) + (6.25 * h) - (5 * a) + (5 if g == "Homme" else -161)
 
-    # التبويبات أصبحت قسمين أساسيين: الماسح الذكي + مؤشر رضا المطعم للجميع
     tab_scanner, tab_feedback = st.tabs(["📸 Scanner & Analyse", "📊 Satisfaction Resto U"])
 
-    # --- 1. قسم الماسح والتحليل (بدون إظهار اسم الطبق) ---
+    # --- 1. قسم الماسح والتحليل ---
     with tab_scanner:
         st.markdown("<div class='main-card'>", unsafe_allow_html=True)
         
@@ -188,11 +214,11 @@ else:
                 st.session_state.show_rating_page = False
                 st.rerun()
 
-        # ب: عرض المؤشرات والنتائج فقط دون ذكر اسم الطبق
+        # ب: عرض النتائج والمؤشر الملون الجديد والنصائح المبوبة
         elif st.session_state.analysis_done:
             st.markdown("<h4 style='color: #1b5e20;'>📊 Résultats Nutritionnels</h4>", unsafe_allow_html=True)
             if st.session_state.rating_success:
-                st.success("🌟 Merci ! Évaluation enregistrée avec succès.")
+                st.success("🌟 Merci ! Évaluation enregistrée.")
                 
             p_val = st.session_state.nutrients['prot']
             c_val = st.session_state.nutrients['carb']
@@ -200,7 +226,8 @@ else:
             fib_val = st.session_state.nutrients['fib']
             vit_val = st.session_state.nutrients['vit']
             score = st.session_state.nutrients['score']
-            advice = st.session_state.nutrients['advice']
+            tip_type = st.session_state.nutrients['tip_type']
+            tip_msg = st.session_state.nutrients['tip_msg']
             
             m1, m2, m3 = st.columns(3)
             with m1:
@@ -217,53 +244,76 @@ else:
                 st.markdown(f"""<div class="metric-box"><div style="font-size:10px; color:#00695c; font-weight:bold;">Vitamines</div><div style="font-size:15px; color:#004d40; font-weight:bold;">{vit_val}%</div></div>""", unsafe_allow_html=True)
             
             st.markdown("---")
-            st.markdown(f"🎯 **Compatibilité avec votre profil :** {score}%")
-            st.warning(f"💡 **Conseils & Compléments :**\n\n{advice}")
+            st.markdown(f"🎯 **Compatibilité profil :** **{score}%**")
+            
+            # المؤشر الملون المتدرج (أحمر ➔ أصفر ➔ أخضر ➔ أزرق للأكثر ملائمة)
+            st.markdown(f"""
+                <div style='background: #e0e0e0; border-radius: 10px; padding: 4px; margin-top: 6px;'>
+                    <div style='height: 16px; border-radius: 8px; background: linear-gradient(90deg, #e53935 0%, #fbc02d 35%, #43a047 70%, #1e88e5 100%); width: {score}%;'></div>
+                </div>
+                <div style='display: flex; justify-content: space-between; font-size: 10px; color: #555; margin-top: 3px; font-weight: bold;'>
+                    <span style='color: #e53935;'>Faible</span>
+                    <span style='color: #fbc02d;'>Moyen</span>
+                    <span style='color: #43a047;'>Bon</span>
+                    <span style='color: #1e88e5;'>Optimal (Bleu)</span>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown("💡 **Conseils & Actions Recommandées :**", unsafe_allow_html=True)
+            
+            # عرض النصيحة في مربعات ملونة قصيرة ومنظمة
+            if tip_type == "green":
+                st.markdown(f"<div class='tip-box-green'>🥗 {tip_msg}</div>", unsafe_allow_html=True)
+            elif tip_type == "orange":
+                st.markdown(f"<div class='tip-box-orange'>⚠️ {tip_msg}</div>", unsafe_allow_html=True)
+            else:
+                st.markdown(f"<div class='tip-box-blue'>⚡ {tip_msg}</div>", unsafe_allow_html=True)
             
             col_act1, col_act2 = st.columns(2)
             with col_act1:
-                if st.button("⭐ Noter ce repas"):
+                if st.button("⭐ Noter"):
                     st.session_state.show_rating_page = True
                     st.session_state.rating_success = False
                     st.rerun()
             with col_act2:
-                if st.button("🔄 Scanner un autre"):
+                if st.button("🔄 Nouveau"):
                     st.session_state.captured_image = None
                     st.session_state.analysis_done = False
                     st.session_state.show_camera = False
                     st.session_state.rating_success = False
                     st.rerun()
                 
-        # ج: معاينة الصورة والتحليل الذكي لقاعدة بيانات الأطباق التونسية
+        # ج: معاينة الصورة والتحليل الذكي
         elif st.session_state.captured_image is not None:
             st.image(st.session_state.captured_image, use_column_width=True)
             
             c_btn1, c_btn2 = st.columns(2)
             with c_btn1:
-                if st.button("🚀 Lancer l'analyse IA"):
-                    # محاكاة ذكية مبنية على قاعدة بيانات الأطعمة التونسية (تتغير حسب الصورة بدقة)
+                if st.button("🚀 Analyser"):
                     img_bytes = st.session_state.captured_image.getvalue() if hasattr(st.session_state.captured_image, 'getvalue') else str(st.session_state.captured_image).encode()
-                    db_index = sum(img_bytes) % 5
+                    db_index = sum(img_bytes) % 4
                     
                     if db_index == 0:
-                        p, c, f, fib, vit, sc = 20, 78, 11, 12, 90, 88
-                        adv = "Repas riche en glucides et fibres. Ajoutez un œuf dur ou un morceau de fromage pour parfaire vos protéines."
+                        p, c, f, fib, vit, sc = 18, 75, 12, 10, 85, 76
+                        tip_type = "orange"
+                        tip_msg = "Glucides élevés ! 🚶‍♂️ Marchez 25 min pour l'équilibre énergétique."
                     elif db_index == 1:
-                        p, c, f, fib, vit, sc = 36, 52, 14, 6, 82, 94
-                        adv = "Très bon apport en protéines. Pensez à intégrer une salade verte ou mechouia en accompagnement."
+                        p, c, f, fib, vit, sc = 38, 45, 13, 6, 90, 98
+                        tip_type = "green"
+                        tip_msg = "Parfait ! 💧 Pensez juste à boire un grand verre d'eau."
                     elif db_index == 2:
-                        p, c, f, fib, vit, sc = 28, 60, 9, 15, 95, 91
-                        adv = "Excellente source de protéines végétales et de fer. Idéal pour l'énergie de la journée."
-                    elif db_index == 3:
-                        p, c, f, fib, vit, sc = 32, 40, 12, 7, 88, 92
-                        adv = "Profil nutritionnel optimal. Couvre parfaitement vos besoins énergétiques sans excès."
+                        p, c, f, fib, vit, sc = 25, 58, 8, 14, 95, 89
+                        tip_type = "blue"
+                        tip_msg = "Riche en fibres ! 🍏 Ajoutez un yaourt pour compléter les protéines."
                     else:
-                        p, c, f, fib, vit, sc = 24, 68, 16, 5, 75, 79
-                        adv = "Repas savoureux. Équilibrez votre apport en buvant assez d'eau et en ajoutant des légumes frais."
+                        p, c, f, fib, vit, sc = 30, 80, 20, 5, 70, 65
+                        tip_type = "orange"
+                        tip_msg = "Repas lourd ! 🏃‍♂️ Jogging de 30 min recommandé ce soir."
                         
                     st.session_state.nutrients = {
                         'prot': p, 'carb': c, 'fat': f, 'fib': fib, 
-                        'vit': vit, 'score': sc, 'advice': adv
+                        'vit': vit, 'score': sc, 'tip_type': tip_type, 'tip_msg': tip_msg
                     }
                     st.session_state.analysis_done = True
                     st.rerun()
@@ -273,7 +323,7 @@ else:
                     st.session_state.show_camera = False
                     st.rerun()
                     
-        # د: واجهة Zero-Scroll للأزرار المربعة المتجاورة
+        # د: أزرار الماسح المتجاورة (Zero-Scroll)
         else:
             st.markdown("<h4 style='color: #1b5e20; text-align: center; margin-bottom: 8px;'>📸 Scanner le Repas</h4>", unsafe_allow_html=True)
             
@@ -306,7 +356,7 @@ else:
                     
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # --- 2. لوحة رضا الطلبة للمطعم الجامعي (متاح للجميع) ---
+    # --- 2. لوحة رضا الطلبة للمطعم الجامعي ---
     with tab_feedback:
         st.markdown("<div class='main-card'>", unsafe_allow_html=True)
         st.markdown("<h4 style='color: #1b5e20;'>📊 Satisfaction du Resto U</h4>", unsafe_allow_html=True)
@@ -337,5 +387,5 @@ else:
             """, unsafe_allow_html=True)
             
         st.markdown("---")
-        st.info("ℹ️ Le système classe et met à jour les scores automatiquement selon l'horaire de soumission (10h-15h pour le Déjeuner, 15h-19h pour le Dîner).")
+        st.info("ℹ️ Le système classe et met à jour les scores automatiquement selon l'horaire de soumission.")
         st.markdown("</div>", unsafe_allow_html=True)
