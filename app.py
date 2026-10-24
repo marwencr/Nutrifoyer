@@ -32,66 +32,72 @@ if 'analysis_done' not in st.session_state:
 if 'nutrients' not in st.session_state:
     st.session_state.nutrients = {}
 
-# حالات نظام الانتقال لصفحة التقييم بالنجوم
+# حالات نظام التقييم بالنجوم
 if 'show_rating_page' not in st.session_state:
     st.session_state.show_rating_page = False
 if 'rating_success' not in st.session_state:
     st.session_state.rating_success = False
 
-# تخزين التقييمات الديناميكية للغداء والعشاء
+# تخزين التقييمات للغداء والعشاء
 if 'lunch_ratings' not in st.session_state:
     st.session_state.lunch_ratings = [5, 4, 5, 4, 5]
 if 'dinner_ratings' not in st.session_state:
     st.session_state.dinner_ratings = [4, 3, 5, 4, 4]
 
-# تصميم واجهة مستوحاة من الطبيعة واللون الأخضر الصحي
+# تصميم الواجهة الاحترافية (مربعات متجاورة وتفاعلية)
 st.markdown("""
     <style>
     .stApp {
         background: linear-gradient(135deg, #f1f8f5 0%, #e2f0ea 100%);
     }
-    .card {
+    .main-card {
         background: #ffffff;
-        border-radius: 18px;
+        border-radius: 16px;
         border: 1px solid #c8e6c9;
-        padding: 20px;
-        box-shadow: 0 6px 20px rgba(46, 125, 50, 0.06);
-        margin-bottom: 15px;
+        padding: 16px;
+        box-shadow: 0 4px 15px rgba(46, 125, 50, 0.08);
+        margin-bottom: 10px;
     }
-    .header-title {
-        color: #1b5e20;
-        font-weight: 700;
+    .action-box {
+        background: #f4fbf7;
+        border: 2px dashed #81c784;
+        border-radius: 14px;
+        padding: 12px;
         text-align: center;
+        transition: all 0.3s ease;
+    }
+    .action-box:hover {
+        background: #e8f5e9;
+        border-color: #2e7d32;
     }
     .metric-box {
         background: #f8f9fa;
         border: 1px solid #d0d7de;
-        border-radius: 12px;
-        padding: 10px;
+        border-radius: 10px;
+        padding: 8px;
         text-align: center;
     }
     .stButton>button {
         width: 100%;
-        border-radius: 12px;
+        border-radius: 10px;
         font-weight: 600;
         background-color: #2e7d32;
         color: white;
         border: none;
-        height: 44px;
-        box-shadow: 0 4px 12px rgba(46, 125, 50, 0.2);
+        height: 40px;
+        box-shadow: 0 3px 10px rgba(46, 125, 50, 0.2);
         transition: all 0.3s;
     }
     .stButton>button:hover {
         background-color: #1b5e20;
-        transform: translateY(-1px);
     }
     </style>
 """, unsafe_allow_html=True)
 
 # --- نافذة تعديل البروفايل ---
 if st.session_state.edit_profile:
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.markdown("<h2 class='header-title'>⚙️ Profil</h2>", unsafe_allow_html=True)
+    st.markdown("<div class='main-card'>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #1b5e20; text-align: center;'>⚙️ Profil</h3>", unsafe_allow_html=True)
     
     st.session_state.user_name = st.text_input("Nom", st.session_state.user_name)
     st.session_state.gender = st.selectbox("Sexe", ["Homme", "Femme"], index=0 if st.session_state.gender=="Homme" else 1)
@@ -118,7 +124,7 @@ else:
         st.markdown("<h3 style='color: #1b5e20; margin: 0;'>🥗 NutriFoyer</h3>", unsafe_allow_html=True)
         st.markdown("<p style='color: #4caf50; font-size: 11px; margin: 0;'>Équilibre en cité universitaire</p>", unsafe_allow_html=True)
     with top_col2:
-        if st.button("⚙️ Profil"):
+        if st.button("⚙️"):
             st.session_state.edit_profile = True
             st.rerun()
 
@@ -134,57 +140,63 @@ else:
 
     # --- 1. قسم الماسح والتحليل ---
     with tab_scanner:
-        st.markdown("<div class='card'>", unsafe_allow_html=True)
+        st.markdown("<div class='main-card'>", unsafe_allow_html=True)
         
-        # الحالة أ: تقييم النجوم الخمسة
+        # الحالة أ: صفحة التقييم بالنجوم
         if st.session_state.show_rating_page:
-            st.subheader("⭐ Noter le Repas")
+            st.markdown("<h4 style='color: #1b5e20; text-align: center;'>⭐ Noter le Repas</h4>", unsafe_allow_html=True)
             current_hour = datetime.now().hour
             meal_type = "lunch" if 10 <= current_hour < 15 else "dinner"
             meal_name_fr = "Déjeuner" if meal_type == "lunch" else "Dîner"
             
             st.info(f"🕒 Repas : **{meal_name_fr}**")
             
-            if st.button("⭐ 1"):
-                if meal_type == "lunch": st.session_state.lunch_ratings.append(1)
-                else: st.session_state.dinner_ratings.append(1)
-                st.session_state.show_rating_page = False
-                st.session_state.rating_success = True
-                st.rerun()
-            if st.button("⭐⭐ 2"):
-                if meal_type == "lunch": st.session_state.lunch_ratings.append(2)
-                else: st.session_state.dinner_ratings.append(2)
-                st.session_state.show_rating_page = False
-                st.session_state.rating_success = True
-                st.rerun()
-            if st.button("⭐⭐⭐ 3"):
-                if meal_type == "lunch": st.session_state.lunch_ratings.append(3)
-                else: st.session_state.dinner_ratings.append(3)
-                st.session_state.show_rating_page = False
-                st.session_state.rating_success = True
-                st.rerun()
-            if st.button("⭐⭐⭐⭐ 4"):
-                if meal_type == "lunch": st.session_state.lunch_ratings.append(4)
-                else: st.session_state.dinner_ratings.append(4)
-                st.session_state.show_rating_page = False
-                st.session_state.rating_success = True
-                st.rerun()
-            if st.button("⭐⭐⭐⭐⭐ 5 (Or)"):
-                if meal_type == "lunch": st.session_state.lunch_ratings.append(5)
-                else: st.session_state.dinner_ratings.append(5)
-                st.session_state.show_rating_page = False
-                st.session_state.rating_success = True
-                st.rerun()
-                
+            rc1, rc2, rc3, rc4, rc5 = st.columns(5)
+            with rc1:
+                if st.button("⭐ 1"):
+                    if meal_type == "lunch": st.session_state.lunch_ratings.append(1)
+                    else: st.session_state.dinner_ratings.append(1)
+                    st.session_state.show_rating_page = False
+                    st.session_state.rating_success = True
+                    st.rerun()
+            with rc2:
+                if st.button("⭐⭐ 2"):
+                    if meal_type == "lunch": st.session_state.lunch_ratings.append(2)
+                    else: st.session_state.dinner_ratings.append(2)
+                    st.session_state.show_rating_page = False
+                    st.session_state.rating_success = True
+                    st.rerun()
+            with rc3:
+                if st.button("⭐⭐⭐ 3"):
+                    if meal_type == "lunch": st.session_state.lunch_ratings.append(3)
+                    else: st.session_state.dinner_ratings.append(3)
+                    st.session_state.show_rating_page = False
+                    st.session_state.rating_success = True
+                    st.rerun()
+            with rc4:
+                if st.button("⭐⭐⭐⭐ 4"):
+                    if meal_type == "lunch": st.session_state.lunch_ratings.append(4)
+                    else: st.session_state.dinner_ratings.append(4)
+                    st.session_state.show_rating_page = False
+                    st.session_state.rating_success = True
+                    st.rerun()
+            with rc5:
+                if st.button("⭐⭐⭐⭐⭐ 5"):
+                    if meal_type == "lunch": st.session_state.lunch_ratings.append(5)
+                    else: st.session_state.dinner_ratings.append(5)
+                    st.session_state.show_rating_page = False
+                    st.session_state.rating_success = True
+                    st.rerun()
+                    
             if st.button("❌ Retour"):
                 st.session_state.show_rating_page = False
                 st.rerun()
 
         # الحالة ب: عرض النتائج
         elif st.session_state.analysis_done:
-            st.subheader("📊 Résultats")
+            st.markdown("<h4 style='color: #1b5e20;'>📊 Résultats</h4>", unsafe_allow_html=True)
             if st.session_state.rating_success:
-                st.success("🌟 Merci ! Évaluation enregistrée.")
+                st.success("🌟 Merci !")
                 
             p_val = st.session_state.nutrients['prot']
             c_val = st.session_state.nutrients['carb']
@@ -196,36 +208,36 @@ else:
             
             m1, m2, m3 = st.columns(3)
             with m1:
-                st.markdown(f"""<div class="metric-box"><div style="font-size:11px; color:#1565c0; font-weight:bold;">Protéines</div><div style="font-size:16px; color:#0d47a1; font-weight:bold;">{p_val}g</div></div>""", unsafe_allow_html=True)
+                st.markdown(f"""<div class="metric-box"><div style="font-size:10px; color:#1565c0; font-weight:bold;">Protéines</div><div style="font-size:15px; color:#0d47a1; font-weight:bold;">{p_val}g</div></div>""", unsafe_allow_html=True)
             with m2:
-                st.markdown(f"""<div class="metric-box"><div style="font-size:11px; color:#e65100; font-weight:bold;">Glucides</div><div style="font-size:16px; color:#bf360c; font-weight:bold;">{c_val}g</div></div>""", unsafe_allow_html=True)
+                st.markdown(f"""<div class="metric-box"><div style="font-size:10px; color:#e65100; font-weight:bold;">Glucides</div><div style="font-size:15px; color:#bf360c; font-weight:bold;">{c_val}g</div></div>""", unsafe_allow_html=True)
             with m3:
-                st.markdown(f"""<div class="metric-box"><div style="font-size:11px; color:#2e7d32; font-weight:bold;">Lipides</div><div style="font-size:16px; color:#1b5e20; font-weight:bold;">{f_val}g</div></div>""", unsafe_allow_html=True)
+                st.markdown(f"""<div class="metric-box"><div style="font-size:10px; color:#2e7d32; font-weight:bold;">Lipides</div><div style="font-size:15px; color:#1b5e20; font-weight:bold;">{f_val}g</div></div>""", unsafe_allow_html=True)
                 
             m4, m5 = st.columns(2)
             with m4:
-                st.markdown(f"""<div class="metric-box"><div style="font-size:11px; color:#6a1b9a; font-weight:bold;">Fibres</div><div style="font-size:16px; color:#4a148c; font-weight:bold;">{fib_val}g</div></div>""", unsafe_allow_html=True)
+                st.markdown(f"""<div class="metric-box"><div style="font-size:10px; color:#6a1b9a; font-weight:bold;">Fibres</div><div style="font-size:15px; color:#4a148c; font-weight:bold;">{fib_val}g</div></div>""", unsafe_allow_html=True)
             with m5:
-                st.markdown(f"""<div class="metric-box"><div style="font-size:11px; color:#00695c; font-weight:bold;">Vitamines</div><div style="font-size:16px; color:#004d40; font-weight:bold;">{vit_val}%</div></div>""", unsafe_allow_html=True)
+                st.markdown(f"""<div class="metric-box"><div style="font-size:10px; color:#00695c; font-weight:bold;">Vitamines</div><div style="font-size:15px; color:#004d40; font-weight:bold;">{vit_val}%</div></div>""", unsafe_allow_html=True)
             
-            st.markdown("---")
             st.markdown(f"🎯 **Compatibilité :** {score}%")
-            st.info(f"💡 **Conseil :**\n\n{advice}")
+            st.info(f"💡 {advice}")
             
-            st.markdown("---")
-            if st.button("⭐ Noter"):
-                st.session_state.show_rating_page = True
-                st.session_state.rating_success = False
-                st.rerun()
-
-            if st.button("🔄 Nouveau"):
-                st.session_state.captured_image = None
-                st.session_state.analysis_done = False
-                st.session_state.show_camera = False
-                st.session_state.rating_success = False
-                st.rerun()
+            col_act1, col_act2 = st.columns(2)
+            with col_act1:
+                if st.button("⭐ Noter"):
+                    st.session_state.show_rating_page = True
+                    st.session_state.rating_success = False
+                    st.rerun()
+            with col_act2:
+                if st.button("🔄 Nouveau"):
+                    st.session_state.captured_image = None
+                    st.session_state.analysis_done = False
+                    st.session_state.show_camera = False
+                    st.session_state.rating_success = False
+                    st.rerun()
                 
-        # الحالة ج: الصورة أمامك
+        # الحالة ج: معاينة الصورة
         elif st.session_state.captured_image is not None:
             st.image(st.session_state.captured_image, use_column_width=True)
             
@@ -242,9 +254,9 @@ else:
                     sc = random.randint(70, 98)
                     
                     if p < 18:
-                        adv = "⚠️ **Déficit en protéines.** Ajoutez deux œufs durs ou une boîte de thon."
+                        adv = "⚠️ Déficit en protéines. Ajoutez des œufs ou du thon."
                     else:
-                        adv = f"✅ **Parfait !** Couvre vos besoins ({int(bmr)} kcal)."
+                        adv = f"✅ Parfait ! Couvre vos besoins ({int(bmr)} kcal)."
                         
                     st.session_state.nutrients = {'prot': p, 'carb': c, 'fat': f, 'fib': fib, 'vit': vit, 'score': sc, 'advice': adv}
                     st.session_state.analysis_done = True
@@ -255,20 +267,23 @@ else:
                     st.session_state.show_camera = False
                     st.rerun()
                     
-        # الحالة د: الأزرار الرئيسية في نفس السطر وبدون تمرير
+        # الحالة د: مربعات صغيرة متجاورة تظهر مباشرة بدون تمرير (Zero-Scroll UI)
         else:
-            st.subheader("📸 Scanner le Plat")
+            st.markdown("<h4 style='color: #1b5e20; text-align: center; margin-bottom: 8px;'>📸 Scanner le Plat</h4>", unsafe_allow_html=True)
             
-            # وضع زر التحميل وزر الكاميرا جنباً إلى جنب في نفس السطر تماماً
-            col_u1, col_u2 = st.columns(2)
-            with col_u1:
-                uploaded_file = st.file_uploader("📁 Importer", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
+            box_c1, box_c2 = st.columns(2)
+            
+            with box_c1:
+                st.markdown("<div class='action-box'>📁 <b>Importer</b></div>", unsafe_allow_html=True)
+                uploaded_file = st.file_uploader("Fichier", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
                 if uploaded_file is not None:
                     st.session_state.captured_image = uploaded_file
                     st.rerun()
-            with col_u2:
+                    
+            with box_c2:
+                st.markdown("<div class='action-box'>📷 <b>Caméra</b></div>", unsafe_allow_html=True)
                 if not st.session_state.show_camera:
-                    if st.button("📷 Caméra"):
+                    if st.button("Ouvrir"):
                         st.session_state.show_camera = True
                         st.rerun()
                 else:
@@ -277,7 +292,7 @@ else:
                         st.rerun()
             
             if st.session_state.show_camera:
-                camera_file = st.camera_input("Prendre photo", label_visibility="collapsed")
+                camera_file = st.camera_input("Photo", label_visibility="collapsed")
                 if camera_file is not None:
                     st.session_state.captured_image = camera_file
                     st.session_state.show_camera = False
@@ -285,34 +300,24 @@ else:
                     
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # --- 2. قسم المطعم الجامعي (Resto U) ---
+    # --- 2. قسم المطعم الجامعي ---
     with tab_restou:
-        st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.subheader("🍽️ Menus Resto U")
+        st.markdown("<div class='main-card'>", unsafe_allow_html=True)
+        st.markdown("<h4 style='color: #1b5e20;'>🍽️ Menus Resto U</h4>", unsafe_allow_html=True)
         
-        plat = st.selectbox("Plat :", [
-            "Couscous légumes", "Couscous viande", "Couscous poulet", 
-            "Ragoût légumes", "Poulet rôti", "Poisson grillé", 
-            "Lentilles", "Loubia", "Pâtes"
-        ])
-        
-        supp = st.multiselect("Suppléments :", [
-            "Salade verte", "Salade Mechouia", "Fromage", 
-            "Œufs durs", "Yaourt", "Jus"
-        ])
+        plat = st.selectbox("Plat :", ["Couscous", "Ragoût", "Poulet", "Poisson", "Pâtes"], label_visibility="collapsed")
+        supp = st.multiselect("Suppléments :", ["Salade", "Fromage", "Œufs", "Yaourt"], label_visibility="collapsed")
         
         if st.button("📊 Évaluer"):
-            st.success("Évalué avec succès (92% - Excellent) !")
-            if "Œufs durs" not in supp and "Fromage" not in supp:
-                st.warning("⚠️ Conseil : Ajoutez des œufs ou du fromage pour plus de protéines.")
-            else:
-                st.success("✅ Parfait !")
+            st.success("Évalué (92% - Excellent) !")
+            if "Œufs" not in supp and "Fromage" not in supp:
+                st.warning("⚠️ Conseil : Ajoutez des œufs ou du fromage.")
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # --- 3. قسم لوحة رضا المطعم ---
+    # --- 3. لوحة رضا المطعم ---
     with tab_feedback:
-        st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.subheader("📊 Satisfaction Resto")
+        st.markdown("<div class='main-card'>", unsafe_allow_html=True)
+        st.markdown("<h4 style='color: #1b5e20;'>📊 Satisfaction</h4>", unsafe_allow_html=True)
         
         lunch_avg = sum(st.session_state.lunch_ratings) / len(st.session_state.lunch_ratings)
         lunch_pct = int((lunch_avg / 5) * 100)
@@ -323,22 +328,16 @@ else:
         col_s1, col_s2 = st.columns(2)
         with col_s1:
             st.markdown(f"""
-                <div style="background: #e8f5e9; border: 2px solid #81c784; border-radius: 12px; padding: 15px; text-align: center;">
-                    <div style="font-size: 14px; color: #1b5e20; font-weight: bold;">☀️ Midi</div>
-                    <div style="font-size: 28px; color: #2e7d32; font-weight: bold; margin: 5px 0;">{lunch_pct}%</div>
-                    <div style="font-size: 11px; color: #555;">{round(lunch_avg, 1)} / 5 ⭐</div>
+                <div style="background: #e8f5e9; border: 1px solid #81c784; border-radius: 10px; padding: 10px; text-align: center;">
+                    <div style="font-size: 13px; color: #1b5e20; font-weight: bold;">☀️ Midi</div>
+                    <div style="font-size: 24px; color: #2e7d32; font-weight: bold;">{lunch_pct}%</div>
                 </div>
             """, unsafe_allow_html=True)
-            
         with col_s2:
             st.markdown(f"""
-                <div style="background: #e0f2f1; border: 2px solid #4db6ac; border-radius: 12px; padding: 15px; text-align: center;">
-                    <div style="font-size: 14px; color: #004d40; font-weight: bold;">🌙 Soir</div>
-                    <div style="font-size: 28px; color: #00897b; font-weight: bold; margin: 5px 0;">{dinner_pct}%</div>
-                    <div style="font-size: 11px; color: #555;">{round(dinner_avg, 1)} / 5 ⭐</div>
+                <div style="background: #e0f2f1; border: 1px solid #4db6ac; border-radius: 10px; padding: 10px; text-align: center;">
+                    <div style="font-size: 13px; color: #004d40; font-weight: bold;">🌙 Soir</div>
+                    <div style="font-size: 24px; color: #00897b; font-weight: bold;">{dinner_pct}%</div>
                 </div>
             """, unsafe_allow_html=True)
-            
-        st.markdown("---")
-        st.info("ℹ️ Classement automatique selon l'horaire (Midi / Soir).")
         st.markdown("</div>", unsafe_allow_html=True)
