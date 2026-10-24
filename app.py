@@ -6,7 +6,7 @@ from datetime import datetime
 # إعدادات الصفحة
 st.set_page_config(page_title="NutriFoyer", page_icon="🥗", layout="centered")
 
-# تهيئة حالة الجلسة وتخزين التقييمات والوجبات
+# تهيئة حالة الجلسة
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = True
 if 'user_name' not in st.session_state:
@@ -31,12 +31,16 @@ if 'analysis_done' not in st.session_state:
     st.session_state.analysis_done = False
 if 'nutrients' not in st.session_state:
     st.session_state.nutrients = {}
-if 'rated' not in st.session_state:
-    st.session_state.rated = False
 
-# تخزين التقييمات لحساب نسبة رضا المطعم (الغداء والعشاء)
+# حالات نظام الانتقال لصفحة التقييم بالنجوم
+if 'show_rating_page' not in st.session_state:
+    st.session_state.show_rating_page = False
+if 'rating_success' not in st.session_state:
+    st.session_state.rating_success = False
+
+# تخزين التقييمات الديناميكية للغداء والعشاء
 if 'lunch_ratings' not in st.session_state:
-    st.session_state.lunch_ratings = [5, 4, 5, 4, 5] # قيم افتراضية لتبدأ المنصة بحيوية
+    st.session_state.lunch_ratings = [5, 4, 5, 4, 5]
 if 'dinner_ratings' not in st.session_state:
     st.session_state.dinner_ratings = [4, 3, 5, 4, 4]
 
@@ -99,7 +103,7 @@ if st.session_state.edit_profile:
     with col_e1:
         if st.button("💾 Enregistrer"):
             st.session_state.edit_profile = False
-            st.success("Profil mis à jour !")
+            st.success("Profil mis à jour avec succès !")
             st.rerun()
     with col_e2:
         if st.button("❌ Retour"):
@@ -126,16 +130,74 @@ else:
     g = st.session_state.gender
     bmr = (10 * w) + (6.25 * h) - (5 * a) + (5 if g == "Homme" else -161)
 
-    # التبويبات الثلاثة الرئيسية (الماسح + المطعم الجامعي + مؤشر رضا المطعم للجميع)
     tab_scanner, tab_restou, tab_feedback = st.tabs(["📸 Scanner & Analyse", "🍽️ Menus Resto U", "📊 Satisfaction Resto (Tous)"])
 
-    # --- 1. قسم التصوير والتحليل الذكي مع التقييم الشامل والنجوم ---
+    # --- 1. قسم الماسح والتحليل والتحكم بصفحة النجوم ---
     with tab_scanner:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.subheader("📸 Analyse Intelligente par Photo")
         
-        if st.session_state.analysis_done:
-            st.success("Analyse IA et diagnostic complet terminés !")
+        # الحالة أ: إذا اختار المستخدم الانتقال لصفحة تقييم النجوم الخمسة
+        if st.session_state.show_rating_page:
+            st.subheader("⭐ Évaluation du Repas")
+            st.write("Veuillez attribuer une note globale pour ce repas (Classification automatique selon l'heure) :")
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            current_hour = datetime.now().hour
+            # التصنيف التلقائي حسب الوقت (10h - 15h للغداء، وباقي الوقت للعشاء)
+            meal_type = "lunch" if 10 <= current_hour < 15 else "dinner"
+            meal_name_fr = "Déjeuner" if meal_type == "lunch" else "Dîner"
+            
+            st.info(f"🕒 Repas détecté automatiquement : **{meal_name_fr}**")
+            
+            # أزرار النجوم الخمسة المنفصلة
+            if st.button("⭐ 1 Étoile"):
+                if meal_type == "lunch": st.session_state.lunch_ratings.append(1)
+                else: st.session_state.dinner_ratings.append(1)
+                st.session_state.show_rating_page = False
+                st.session_state.rating_success = True
+                st.rerun()
+                
+            if st.button("⭐⭐ 2 Étoiles"):
+                if meal_type == "lunch": st.session_state.lunch_ratings.append(2)
+                else: st.session_state.dinner_ratings.append(2)
+                st.session_state.show_rating_page = False
+                st.session_state.rating_success = True
+                st.rerun()
+                
+            if st.button("⭐⭐⭐ 3 Étoiles"):
+                if meal_type == "lunch": st.session_state.lunch_ratings.append(3)
+                else: st.session_state.dinner_ratings.append(3)
+                st.session_state.show_rating_page = False
+                st.session_state.rating_success = True
+                st.rerun()
+                
+            if st.button("⭐⭐⭐⭐ 4 Étoiles"):
+                if meal_type == "lunch": st.session_state.lunch_ratings.append(4)
+                else: st.session_state.dinner_ratings.append(4)
+                st.session_state.show_rating_page = False
+                st.session_state.rating_success = True
+                st.rerun()
+                
+            if st.button("⭐⭐⭐⭐⭐ 5 Étoiles (Or)"):
+                if meal_type == "lunch": st.session_state.lunch_ratings.append(5)
+                else: st.session_state.dinner_ratings.append(5)
+                st.session_state.show_rating_page = False
+                st.session_state.rating_success = True
+                st.rerun()
+                
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.button("❌ Annuler et retourner aux résultats"):
+                st.session_state.show_rating_page = False
+                st.rerun()
+
+        # الحالة ب: عرض نتائج التحليل (عندما تكون المنصة في وضع النتائج)
+        elif st.session_state.analysis_done:
+            st.subheader("📸 Analyse Intelligente par Photo")
+            
+            if st.session_state.rating_success:
+                st.success("🌟 Merci ! Votre évaluation a été enregistrée avec succès et l'indice de satisfaction global a été mis à jour.")
+                
             st.markdown("### 📊 Résultats nutritionnels détaillés du plat :")
             
             p_val = st.session_state.nutrients['prot']
@@ -146,7 +208,6 @@ else:
             score = st.session_state.nutrients['score']
             advice = st.session_state.nutrients['advice']
             
-            # عرض شامل للمغذيات في 5 مربعات
             m1, m2, m3 = st.columns(3)
             with m1:
                 st.markdown(f"""<div class="metric-box"><div style="font-size:12px; color:#1565c0; font-weight:bold;">Protéines</div><div style="font-size:18px; color:#0d47a1; font-weight:bold;">{p_val}g</div></div>""", unsafe_allow_html=True)
@@ -157,7 +218,7 @@ else:
                 
             m4, m5 = st.columns(2)
             with m4:
-                st.markdown(f"""<div class="metric-box"><div style="font-size:12px; color:#6a1b9a; font-weight:bold;">Fibres (ألياف)</div><div style="font-size:18px; color:#4a148c; font-weight:bold;">{fib_val}g</div></div>""", unsafe_allow_html=True)
+                st.markdown(f"""<div class="metric-box"><div style="font-size:12px; color:#6a1b9a; font-weight:bold;">Fibres</div><div style="font-size:18px; color:#4a148c; font-weight:bold;">{fib_val}g</div></div>""", unsafe_allow_html=True)
             with m5:
                 st.markdown(f"""<div class="metric-box"><div style="font-size:12px; color:#00695c; font-weight:bold;">Vitamines</div><div style="font-size:18px; color:#004d40; font-weight:bold;">{vit_val}%</div></div>""", unsafe_allow_html=True)
             
@@ -175,66 +236,24 @@ else:
             st.info(f"💡 **Recommandations & Alternatives NutriFoyer :**\n\n{advice}")
             
             st.markdown("---")
-            st.subheader("⭐ Évaluez ce repas (Évaluation par étoiles)")
             
-            if not st.session_state.rated:
-                st.write("Cliquez sur le nombre d'étoiles pour attribuer votre note :")
-                
-                # أزرار النجوم التفاعلية المباشرة
-                star_c1, star_c2, star_c3, star_c4, star_c5 = st.columns(5)
-                
-                current_hour = datetime.now().hour
-                # تحديد الوجبة تلقائياً حسب الوقت (من 10 صباحاً لـ 3 عصراً غداء، ومن 3 عصراً لـ 7 مساءً عشاء)
-                meal_type = "lunch" if 10 <= current_hour < 15 else "dinner"
-                meal_name_fr = "Déjeuner (الغداء)" if meal_type == "lunch" else "Dîner (العشاء)"
-                
-                with star_c1:
-                    if st.button("⭐ 1"):
-                        st.session_state.rated = True
-                        if meal_type == "lunch": st.session_state.lunch_ratings.append(1)
-                        else: st.session_state.dinner_ratings.append(1)
-                        st.success(f"Merci ! Noté 1/5 pour le {meal_name_fr}.")
-                        st.rerun()
-                with star_c2:
-                    if st.button("⭐⭐ 2"):
-                        st.session_state.rated = True
-                        if meal_type == "lunch": st.session_state.lunch_ratings.append(2)
-                        else: st.session_state.dinner_ratings.append(2)
-                        st.success(f"Merci ! Noté 2/5 pour le {meal_name_fr}.")
-                        st.rerun()
-                with star_c3:
-                    if st.button("⭐⭐⭐ 3"):
-                        st.session_state.rated = True
-                        if meal_type == "lunch": st.session_state.lunch_ratings.append(3)
-                        else: st.session_state.dinner_ratings.append(3)
-                        st.success(f"Merci ! Noté 3/5 pour le {meal_name_fr}.")
-                        st.rerun()
-                with star_c4:
-                    if st.button("⭐⭐⭐⭐ 4"):
-                        st.session_state.rated = True
-                        if meal_type == "lunch": st.session_state.lunch_ratings.append(4)
-                        else: st.session_state.dinner_ratings.append(4)
-                        st.success(f"Merci ! Noté 4/5 pour le {meal_name_fr}.")
-                        st.rerun()
-                with star_c5:
-                    if st.button("⭐⭐⭐⭐⭐ 5"):
-                        st.session_state.rated = True
-                        if meal_type == "lunch": st.session_state.lunch_ratings.append(5)
-                        else: st.session_state.dinner_ratings.append(5)
-                        st.balloons()
-                        st.success(f"🌟 Magnifique ! Noté 5/5 (Or) pour le {meal_name_fr}. Merci pour votre retour !")
-                        st.rerun()
-            else:
-                st.success("✅ Merci ! Votre évaluation a bien été enregistrée et transmise automatiquement au gestionnaire du Resto U.")
+            # زر الانتقال إلى صفحة تقييم النجوم تحت التحليل تماماً
+            if st.button("⭐ Noter ce repas (Évaluation par étoiles)"):
+                st.session_state.show_rating_page = True
+                st.session_state.rating_success = False
+                st.rerun()
 
+            st.markdown("<br>", unsafe_allow_html=True)
             if st.button("🔄 Analyser un autre plat"):
                 st.session_state.captured_image = None
                 st.session_state.analysis_done = False
                 st.session_state.show_camera = False
-                st.session_state.rated = False
+                st.session_state.rating_success = False
                 st.rerun()
                 
+        # الحالة ج: رفع الصورة أو فتح الكاميرا
         elif st.session_state.captured_image is not None:
+            st.subheader("📸 Analyse Intelligente par Photo")
             st.image(st.session_state.captured_image, use_column_width=True)
             
             c_btn1, c_btn2 = st.columns(2)
@@ -265,6 +284,7 @@ else:
                     st.rerun()
                     
         else:
+            st.subheader("📸 Analyse Intelligente par Photo")
             st.write("Sélectionnez une option pour ajouter une photo de votre plateau :")
             
             uploaded_file = st.file_uploader("Importer une image depuis l'appareil", type=["jpg", "jpeg", "png"])
@@ -331,13 +351,13 @@ else:
                     st.success("✅ **Parfait !** Vos suppléments complètent idéalement vos apports.")
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # --- 3. قسم لوحة تحكم رضا المطعم (الجميع - الغداء والعشاء) ---
+    # --- 3. لوحة تحكم رضا المطعم (الغداء والعشاء تتغير ديناميكياً) ---
     with tab_feedback:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
         st.subheader("📊 Tableau de Satisfaction du Restaurant (Resto U)")
-        st.write("Indicateurs en temps réel de la satisfaction des étudiants (Géré automatiquement par les notes des repas) :")
+        st.write("Indicateurs en temps réel mis à jour dynamiquement selon les notes des étudiants :")
         
-        # حساب نسبة رضا الغداء والعشاء بناءً على النجوم (تحويل التقييمات من 5 إلى نسبة مئوية 100%)
+        # حساب نسبة الرضا ديناميكياً بناءً على التقييمات المسجلة
         lunch_avg = sum(st.session_state.lunch_ratings) / len(st.session_state.lunch_ratings)
         lunch_percentage = int((lunch_avg / 5) * 100)
         
@@ -351,8 +371,8 @@ else:
                 <div style="background: #e8f5e9; border: 2px solid #81c784; border-radius: 16px; padding: 20px; text-align: center;">
                     <div style="font-size: 16px; color: #1b5e20; font-weight: bold;">☀️ Repas de Midi (Déjeuner)</div>
                     <div style="font-size: 36px; color: #2e7d32; font-weight: bold; margin: 10px 0;">{lunch_percentage}%</div>
-                    <div style="font-size: 12px; color: #555;">Indice de satisfaction des étudiants</div>
-                    <div style="margin-top: 10px; font-size: 13px; color: #00796b;">Moyenne : {round(lunch_avg, 1)} / 5 ⭐</div>
+                    <div style="font-size: 12px; color: #555;">Indice de satisfaction global</div>
+                    <div style="margin-top: 10px; font-size: 13px; color: #00796b;">Moyenne : {round(lunch_avg, 1)} / 5 ⭐ ({len(st.session_state.lunch_ratings)} votes)</div>
                 </div>
             """, unsafe_allow_html=True)
             
@@ -361,11 +381,11 @@ else:
                 <div style="background: #e0f2f1; border: 2px solid #4db6ac; border-radius: 16px; padding: 20px; text-align: center;">
                     <div style="font-size: 16px; color: #004d40; font-weight: bold;">🌙 Repas du Soir (Dîner)</div>
                     <div style="font-size: 36px; color: #00897b; font-weight: bold; margin: 10px 0;">{dinner_percentage}%</div>
-                    <div style="font-size: 12px; color: #555;">Indice de satisfaction des étudiants</div>
-                    <div style="margin-top: 10px; font-size: 13px; color: #00796b;">Moyenne : {round(dinner_avg, 1)} / 5 ⭐</div>
+                    <div style="font-size: 12px; color: #555;">Indice de satisfaction global</div>
+                    <div style="margin-top: 10px; font-size: 13px; color: #00796b;">Moyenne : {round(dinner_avg, 1)} / 5 ⭐ ({len(st.session_state.dinner_ratings)} votes)</div>
                 </div>
             """, unsafe_allow_html=True)
             
         st.markdown("---")
-        st.info("ℹ️ **Note pour l'administration et les étudiants :** Le système classe et met à jour ces pourcentages automatiquement selon les horaires de soumission (De 10h à 15h pour le Déjeuner, et de 15h à 19h pour le Dîner).")
+        st.info("ℹ️ **Information :** Le système classe automatiquement les votes selon l'heure (10h-15h pour le Déjeuner, 15h-19h pour le Dîner) et met à jour les scores en temps réel.")
         st.markdown("</div>", unsafe_allow_html=True)
