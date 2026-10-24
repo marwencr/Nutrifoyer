@@ -6,91 +6,87 @@ from datetime import datetime
 # إعدادات الصفحة مع أيقونة طبق السلطة 🥗
 st.set_page_config(page_title="NutriFoyer", page_icon="🥗", layout="centered")
 
-# --- CSS مخصص لحل مشكلة الوضع المظلم وتأمين الواجهة ---
-st.markdown("""
-    <style>
-    @media (prefers-color-scheme: dark) {
-        .stApp {
-            background: linear-gradient(135deg, #0f1f17 0%, #1a2e22 100%);
-        }
-        .main-card {
-            background: #1e2923 !important;
-            border: 1px solid #2e7d32 !important;
-            color: #e2e8f0 !important;
-        }
-        .metric-box {
-            background: #16221c !important;
-            border: 1px solid #334155 !important;
-            color: #f1f5f9 !important;
-        }
-        .action-box {
-            background: #16221c !important;
-            border: 2px dashed #4caf50 !important;
-            color: #f1f5f9 !important;
-        }
-    }
-    @media (prefers-color-scheme: light) {
-        .stApp {
-            background: linear-gradient(135deg, #f1f8f5 0%, #e2f0ea 100%);
-        }
-        .main-card {
-            background: #ffffff !important;
-            border: 1px solid #c8e6c9 !important;
-            color: #1f2937 !important;
-        }
-        .metric-box {
-            background: #f8f9fa !important;
-            border: 1px solid #d0d7de !important;
-            color: #1f2937 !important;
-        }
-        .action-box {
-            background: #f4fbf7 !important;
-            border: 2px dashed #81c784 !important;
-            color: #1f2937 !important;
-        }
-    }
+# --- تهيئة حالة الثيم (الوضع المظلم / الفاتح) أولاً ---
+if 'dark_mode' not in st.session_state: st.session_state.dark_mode = False
 
-    .main-card {
+# --- تطبيق CSS الديناميكي حسب حالة الثيم المختارة ---
+if st.session_state.dark_mode:
+    bg_gradient = "linear-gradient(135deg, #0f1f17 0%, #1a2e22 100%)"
+    card_bg = "#1e2923"
+    card_border = "#2e7d32"
+    text_color = "#e2e8f0"
+    metric_bg = "#16221c"
+    metric_border = "#334155"
+    action_bg = "#16221c"
+    action_border = "#4caf50"
+else:
+    bg_gradient = "linear-gradient(135deg, #f1f8f5 0%, #e2f0ea 100%)"
+    card_bg = "#ffffff"
+    card_border = "#c8e6c9"
+    text_color = "#1f2937"
+    metric_bg = "#f8f9fa"
+    metric_border = "#d0d7de"
+    action_bg = "#f4fbf7"
+    action_border = "#81c784"
+
+st.markdown(f"""
+    <style>
+    .stApp {{
+        background: {bg_gradient};
+    }}
+    .main-card {{
+        background: {card_bg} !important;
+        border: 1px solid {card_border} !important;
+        color: {text_color} !important;
         border-radius: 16px;
         padding: 16px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         margin-bottom: 10px;
-    }
-    .action-box {
+    }}
+    .action-box {{
+        background: {action_bg} !important;
+        border: 2px dashed {action_border} !important;
+        color: {text_color} !important;
         border-radius: 14px;
         padding: 12px;
         text-align: center;
-    }
-    .metric-box {
+    }}
+    .metric-box {{
+        background: {metric_bg} !important;
+        border: 1px solid {metric_border} !important;
+        color: {text_color} !important;
         border-radius: 10px;
         padding: 8px;
         text-align: center;
-    }
-    .tip-box-green {
+    }}
+    .tip-box-green {{
         background: rgba(46, 125, 50, 0.15);
         border-left: 5px solid #2e7d32;
         padding: 10px;
         border-radius: 8px;
         margin-bottom: 8px;
         font-size: 13px;
-    }
-    .tip-box-orange {
+        color: {text_color};
+    }}
+    .tip-box-orange {{
         background: rgba(239, 108, 0, 0.15);
         border-left: 5px solid #ef6c00;
         padding: 10px;
         border-radius: 8px;
         margin-bottom: 8px;
         font-size: 13px;
-    }
-    .tip-box-blue {
+        color: {text_color};
+    }}
+    .tip-box-blue {{
         background: rgba(21, 101, 192, 0.15);
         border-left: 5px solid #1565c0;
         padding: 10px;
         border-radius: 8px;
         margin-bottom: 8px;
         font-size: 13px;
-    }
-    .stButton>button {
+        color: {text_color};
+    }}
+    .stButton>button {{
         width: 100%;
         border-radius: 10px;
         font-weight: 600;
@@ -100,14 +96,14 @@ st.markdown("""
         height: 40px;
         box-shadow: 0 3px 10px rgba(46, 125, 50, 0.2);
         transition: all 0.3s;
-    }
-    .stButton>button:hover {
+    }}
+    .stButton>button:hover {{
         background-color: #1b5e20;
-    }
+    }}
     </style>
 """, unsafe_allow_html=True)
 
-# --- تهيئة حالة الجلسة ---
+# --- تهيئة حالة الجلسة وباقي المتغيرات ---
 if 'logged_in' not in st.session_state: st.session_state.logged_in = True
 if 'user_name' not in st.session_state: st.session_state.user_name = "Marwan"
 if 'gender' not in st.session_state: st.session_state.gender = "Homme"
@@ -120,7 +116,7 @@ if 'captured_image' not in st.session_state: st.session_state.captured_image = N
 if 'show_camera' not in st.session_state: st.session_state.show_camera = False
 if 'analysis_done' not in st.session_state: st.session_state.analysis_done = False
 if 'nutrients' not in st.session_state: st.session_state.nutrients = {}
-if 'learning_counter' not in st.session_state: st.session_state.learning_counter = 1425
+if 'learning_counter' not in st.session_state: st.session_state.learning_counter = 1430
 
 if 'show_rating_page' not in st.session_state: st.session_state.show_rating_page = False
 if 'rating_success' not in st.session_state: st.session_state.rating_success = False
@@ -152,13 +148,21 @@ if st.session_state.edit_profile:
     st.markdown("</div>", unsafe_allow_html=True)
 
 else:
-    # --- الواجهة الرئيسة ---
-    top_col1, top_col2 = st.columns([4, 1])
+    # --- الواجهة الرئيسة مع أزرار التحكم العلوية (الوضع المظلم + البروفايل) ---
+    top_col1, top_col_theme, top_col_settings = st.columns([3, 1, 1])
     with top_col1:
-        st.markdown("<h3 style='margin: 0;'>🥗 NutriFoyer <span style='font-size:11px; color:#4caf50;'>AI Engine v3.8 Stable</span></h3>", unsafe_allow_html=True)
-        st.markdown(f"<p style='font-size: 11px; margin: 0;'>Modèle IA entraîné sur {st.session_state.learning_counter} repas universitaires</p>", unsafe_allow_html=True)
-    with top_col2:
-        if st.button("⚙️"):
+        st.markdown("<h3 style='margin: 0;'>🥗 NutriFoyer <span style='font-size:11px; color:#4caf50;'>v4.0</span></h3>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-size: 11px; margin: 0;'>IA entraînée sur {st.session_state.learning_counter} repas</p>", unsafe_allow_html=True)
+    
+    with top_col_theme:
+        # زر تبديل الوضع المظلم / الفاتح
+        theme_icon = "☀️" if st.session_state.dark_mode else "🌙"
+        if st.button(theme_icon, help="Changer le mode d'affichage"):
+            st.session_state.dark_mode = not st.session_state.dark_mode
+            st.rerun()
+            
+    with top_col_settings:
+        if st.button("⚙️", help="Mon Profil"):
             st.session_state.edit_profile = True
             st.rerun()
 
@@ -296,7 +300,7 @@ else:
                     st.session_state.rating_success = False
                     st.rerun()
                 
-        # ج: معاينة الصورة مع حماية ضد الأخطاء (Safe Try-Except Execution)
+        # ج: معاينة الصورة مع حماية ضد الأخطاء
         elif st.session_state.captured_image is not None:
             try:
                 st.image(st.session_state.captured_image, use_column_width=True)
@@ -307,7 +311,6 @@ else:
             with c_btn1:
                 if st.button("🚀 Lancer l'analyse IA"):
                     try:
-                        # استخراج آمن للبصمة الرقمية مع حماية ضد الانهيار
                         img_bytes = b""
                         if hasattr(st.session_state.captured_image, 'getvalue'):
                             img_bytes = st.session_state.captured_image.getvalue()
@@ -317,7 +320,7 @@ else:
                         hash_val = int(hashlib.md5(img_bytes).hexdigest(), 16)
                         db_index = hash_val % 5
                     except Exception:
-                        db_index = 1 # قيمة افتراضية آمنة في حال فشل الهاش
+                        db_index = 1
                     
                     if db_index == 0:
                         items = "Plat principal: Kafteji tunisien + Œuf | Salade mechouia | Pain | Dessert: Orange"
