@@ -3,10 +3,10 @@ from PIL import Image
 import hashlib
 from datetime import datetime
 
-# إعدادات الصفحة مع أيقونة طبق السلطة 🥗 وضمان العرض المضغوط بدون تمرير
+# إعدادات الصفحة مع أيقونة طبق السلطة 🥗
 st.set_page_config(page_title="NutriFoyer", page_icon="🥗", layout="centered")
 
-# --- تصميم CSS مضغوط كلياً (Zero-Scroll) وألوان مخصصة ومميزة لكل عنصر ---
+# --- تصميم CSS متوازن: شعار واضح تماماً مع الحفاظ على عدم التمرير ---
 st.markdown("""
     <style>
     .stApp {
@@ -16,9 +16,9 @@ st.markdown("""
         background: #ffffff !important;
         border: 1px solid #c8e6c9 !important;
         border-radius: 12px;
-        padding: 10px 12px !important;
+        padding: 12px !important;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-        margin-bottom: 6px !important;
+        margin-bottom: 8px !important;
     }
     .action-box {
         background: #f4fbf7 !important;
@@ -61,15 +61,16 @@ st.markdown("""
         background-color: #2e7d32;
         color: white;
         border: none;
-        height: 36px !important;
+        height: 38px !important;
         box-shadow: 0 2px 6px rgba(46, 125, 50, 0.2);
         transition: all 0.3s;
     }
     .stButton>button:hover {
         background-color: #1b5e20;
     }
+    /* مساحة علوية مريحة لظهور الشعار بالكامل دون قص */
     div.block-container {
-        padding-top: 1rem !important;
+        padding-top: 1.8rem !important;
         padding-bottom: 1rem !important;
     }
     </style>
@@ -119,16 +120,16 @@ if st.session_state.edit_profile:
     st.markdown("</div>", unsafe_allow_html=True)
 
 else:
-    # --- الواجهة الرئيسة بمساحة مضغوطة وعلوية متناسقة ---
+    # --- الواجهة الرئيسة مع شعار واضح وغير مقصوص ---
     top_col1, top_col2 = st.columns([4, 1])
     with top_col1:
-        st.markdown("<h3 style='margin: 0; color: #1b5e20;'>🥗 NutriFoyer <span style='font-size:10px; color:#2e7d32;'>v5.1 Pro</span></h3>", unsafe_allow_html=True)
+        st.markdown("<h2 style='margin: 0; color: #1b5e20; font-size: 24px;'>🥗 NutriFoyer <span style='font-size:12px; color:#2e7d32;'>v5.2 Pro</span></h2>", unsafe_allow_html=True)
     with top_col2:
         if st.button("⚙️", help="Mon Profil"):
             st.session_state.edit_profile = True
             st.rerun()
 
-    st.markdown("<hr style='margin: 6px 0;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin: 8px 0;'>", unsafe_allow_html=True)
 
     tab_scanner, tab_feedback = st.tabs(["📸 Scanner & Analyse", "📊 Satisfaction Resto U"])
 
@@ -312,7 +313,7 @@ else:
                     st.session_state.show_camera = False
                     st.rerun()
                     
-        # د: واجهة الرفع والتقاط الكاميرا بدون أي تمرير (Zero-Scroll Compact)
+        # د: واجهة الرفع والتقاط الكاميرا بدون تمرير
         else:
             st.markdown("<h4 style='text-align: center; margin-bottom: 6px; color: #1b5e20; font-size: 14px;'>📸 Scanner le Plateau</h4>", unsafe_allow_html=True)
             
