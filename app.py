@@ -68,7 +68,6 @@ st.markdown("""
     .stButton>button:hover {
         background-color: #1b5e20;
     }
-    /* إجبار عنصر الكاميرا على الظهور بشكل أفقي (Landscape) لسهولة التقاط الطبق */
     video {
         width: 100% !important;
         height: auto !important;
@@ -130,7 +129,7 @@ else:
     # --- الواجهة الرئيسة مع شعار واضح ---
     top_col1, top_col2 = st.columns([4, 1])
     with top_col1:
-        st.markdown("<h2 style='margin: 0; color: #1b5e20; font-size: 24px;'>🥗 NutriFoyer <span style='font-size:12px; color:#2e7d32;'>v6.0 Ultra</span></h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='margin: 0; color: #1b5e20; font-size: 24px;'>🥗 NutriFoyer <span style='font-size:12px; color:#2e7d32;'>v6.1 Pro</span></h2>", unsafe_allow_html=True)
     with top_col2:
         if st.button("⚙️", help="Mon Profil"):
             st.session_state.edit_profile = True
@@ -194,9 +193,9 @@ else:
                 st.session_state.show_rating_page = False
                 st.rerun()
 
-        # ب: عرض نتائج التحليل (بدون سطر المكونات نهائياً)
+        # ب: عرض نتائج التحليل (بعنوان Analyse فقط)
         elif st.session_state.analysis_done:
-            st.markdown("<h4 style='color: #1b5e20; margin-bottom: 4px;'>📊 Analyse IA Détaillée (7000+ Modèles)</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='color: #1b5e20; margin-bottom: 4px;'>📊 Analyse</h4>", unsafe_allow_html=True)
             if st.session_state.rating_success:
                 st.success("🌟 Merci ! Évaluation enregistrée.")
                 
@@ -311,9 +310,9 @@ else:
                     st.session_state.show_camera = False
                     st.rerun()
                     
-        # د: واجهة الرفع والتقاط الكاميرا بإطار أفقي متكيف
+        # د: واجهة الرفع والتقاط الكاميرا
         else:
-            st.markdown("<h4 style='text-align: center; margin-bottom: 6px; color: #1b5e20; font-size: 14px;'>📸 Scanner le Plateau (Mode Paysage)</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: center; margin-bottom: 6px; color: #1b5e20; font-size: 14px;'>📸 Scanner le Plateau</h4>", unsafe_allow_html=True)
             
             box_c1, box_c2 = st.columns(2)
             
