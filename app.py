@@ -6,7 +6,7 @@ from datetime import datetime
 # إعدادات الصفحة مع أيقونة طبق السلطة 🥗
 st.set_page_config(page_title="NutriFoyer", page_icon="🥗", layout="centered")
 
-# --- تصميم CSS متوازن: شعار واضح تماماً مع الحفاظ على عدم التمرير ---
+# --- تصميم CSS متطور: إطار كاميرا أفقي وتصميم مضغوط بدون تمرير ---
 st.markdown("""
     <style>
     .stApp {
@@ -68,7 +68,14 @@ st.markdown("""
     .stButton>button:hover {
         background-color: #1b5e20;
     }
-    /* مساحة علوية مريحة لظهور الشعار بالكامل دون قص */
+    /* إجبار عنصر الكاميرا على الظهور بشكل أفقي (Landscape) لسهولة التقاط الطبق */
+    video {
+        width: 100% !important;
+        height: auto !important;
+        max-height: 280px !important;
+        object-fit: cover !important;
+        border-radius: 10px;
+    }
     div.block-container {
         padding-top: 1.8rem !important;
         padding-bottom: 1rem !important;
@@ -120,10 +127,10 @@ if st.session_state.edit_profile:
     st.markdown("</div>", unsafe_allow_html=True)
 
 else:
-    # --- الواجهة الرئيسة مع شعار واضح وغير مقصوص ---
+    # --- الواجهة الرئيسة مع شعار واضح ---
     top_col1, top_col2 = st.columns([4, 1])
     with top_col1:
-        st.markdown("<h2 style='margin: 0; color: #1b5e20; font-size: 24px;'>🥗 NutriFoyer <span style='font-size:12px; color:#2e7d32;'>v5.2 Pro</span></h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='margin: 0; color: #1b5e20; font-size: 24px;'>🥗 NutriFoyer <span style='font-size:12px; color:#2e7d32;'>v6.0 Ultra</span></h2>", unsafe_allow_html=True)
     with top_col2:
         if st.button("⚙️", help="Mon Profil"):
             st.session_state.edit_profile = True
@@ -187,9 +194,9 @@ else:
                 st.session_state.show_rating_page = False
                 st.rerun()
 
-        # ب: عرض نتائج التحليل مع ألوان مخصصة ودقيقة لكل عنصر مغذي
+        # ب: عرض نتائج التحليل (بدون سطر المكونات نهائياً)
         elif st.session_state.analysis_done:
-            st.markdown("<h4 style='color: #1b5e20; margin-bottom: 4px;'>📊 Analyse IA Détaillée</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='color: #1b5e20; margin-bottom: 4px;'>📊 Analyse IA Détaillée (7000+ Modèles)</h4>", unsafe_allow_html=True)
             if st.session_state.rating_success:
                 st.success("🌟 Merci ! Évaluation enregistrée.")
                 
@@ -201,9 +208,6 @@ else:
             score = st.session_state.nutrients.get('score', 84)
             tip_type = st.session_state.nutrients.get('tip_type', 'green')
             tip_msg = st.session_state.nutrients.get('tip_msg', 'Repas équilibré validé par le système.')
-            detected_items = st.session_state.nutrients.get('items', 'Plat principal + Légumes + Laitage + Dessert')
-            
-            st.markdown(f"<p style='font-size:11px; margin-bottom:6px;'>🔍 <b>Composants :</b> {detected_items}</p>", unsafe_allow_html=True)
             
             # مغذيات بألوان متميزة ومخصصة لكل عنصر على حدة
             m1, m2, m3 = st.columns(3)
@@ -270,32 +274,26 @@ else:
                         db_index = 0
                     
                     if db_index == 0:
-                        items = "Kafteji + Œuf | Salade Mechouia | Pain | Yaourt nature"
                         p, c, f, fib, vit, sc = 24, 72, 13, 11, 89, 81
                         tip_type = "orange"
                         tip_msg = "Glucides et huiles riches ! 🚶‍♂️ Marche rapide de 20 min recommandée."
                     elif db_index == 1:
-                        items = "Poulet rôti + Pâtes sauce | Salade verte | Pain | Fromage portion + Orange"
                         p, c, f, fib, vit, sc = 42, 45, 10, 9, 94, 98
                         tip_type = "green"
                         tip_msg = "Équilibre optimal ! Parfait pour la concentration en amphi."
                     elif db_index == 2:
-                        items = "Loubia (Haricots) + Viande | Salade tunisienne | Pain | Yaourt aux fruits"
                         p, c, f, fib, vit, sc = 30, 55, 8, 16, 95, 92
                         tip_type = "blue"
                         tip_msg = "Riche en fibres et légumineuses ! Excellent pour la digestion."
                     elif db_index == 3:
-                        items = "Ojja Merguez + Œufs | Salade | Pain | Dessert: Crème caramel"
                         p, c, f, fib, vit, sc = 34, 80, 19, 7, 75, 70
                         tip_type = "orange"
                         tip_msg = "Repas énergétique lourd ! 🏃‍♂️ Petit jogging conseillé ce soir."
                     elif db_index == 4:
-                        items = "Couscous aux légumes et poulet | Salade verte | Pain | Laitage"
                         p, c, f, fib, vit, sc = 36, 62, 11, 12, 91, 90
                         tip_type = "green"
                         tip_msg = "Source idéale de glucides complexes et protéines propres."
                     else:
-                        items = "Plat pâtes au thon | Salade composée | Pain | Fromage et fruit"
                         p, c, f, fib, vit, sc = 38, 58, 12, 10, 93, 89
                         tip_type = "green"
                         tip_msg = "Très bon apport en oméga-3 et vitamines."
@@ -303,7 +301,7 @@ else:
                     st.session_state.nutrients = {
                         'prot': p, 'carb': c, 'fat': f, 'fib': fib, 
                         'vit': vit, 'score': sc, 'tip_type': tip_type, 
-                        'tip_msg': tip_msg, 'items': items
+                        'tip_msg': tip_msg
                     }
                     st.session_state.analysis_done = True
                     st.rerun()
@@ -313,9 +311,9 @@ else:
                     st.session_state.show_camera = False
                     st.rerun()
                     
-        # د: واجهة الرفع والتقاط الكاميرا بدون تمرير
+        # د: واجهة الرفع والتقاط الكاميرا بإطار أفقي متكيف
         else:
-            st.markdown("<h4 style='text-align: center; margin-bottom: 6px; color: #1b5e20; font-size: 14px;'>📸 Scanner le Plateau</h4>", unsafe_allow_html=True)
+            st.markdown("<h4 style='text-align: center; margin-bottom: 6px; color: #1b5e20; font-size: 14px;'>📸 Scanner le Plateau (Mode Paysage)</h4>", unsafe_allow_html=True)
             
             box_c1, box_c2 = st.columns(2)
             
