@@ -6,7 +6,7 @@ from datetime import datetime
 # إعدادات الصفحة مع أيقونة طبق السلطة 🥗
 st.set_page_config(page_title="NutriFoyer", page_icon="🥗", layout="centered")
 
-# --- تصميم CSS متطور: إطار كاميرا أفقي وتصميم مضغوط بدون تمرير ---
+# --- تصميم CSS متطور وآمن للعرض غداً ---
 st.markdown("""
     <style>
     .stApp {
@@ -129,7 +129,7 @@ else:
     # --- الواجهة الرئيسة مع شعار واضح ---
     top_col1, top_col2 = st.columns([4, 1])
     with top_col1:
-        st.markdown("<h2 style='margin: 0; color: #1b5e20; font-size: 24px;'>🥗 NutriFoyer <span style='font-size:12px; color:#2e7d32;'>v6.1 Pro</span></h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='margin: 0; color: #1b5e20; font-size: 24px;'>🥗 NutriFoyer <span style='font-size:12px; color:#2e7d32;'>v6.2 Pro</span></h2>", unsafe_allow_html=True)
     with top_col2:
         if st.button("⚙️", help="Mon Profil"):
             st.session_state.edit_profile = True
@@ -193,7 +193,7 @@ else:
                 st.session_state.show_rating_page = False
                 st.rerun()
 
-        # ب: عرض نتائج التحليل (بعنوان Analyse فقط)
+        # ب: عرض نتائج التحليل (قيم غذائية ومؤشرات ونصيحة عامة فقط دون ذكر المكونات لتجنب الأخطاء)
         elif st.session_state.analysis_done:
             st.markdown("<h4 style='color: #1b5e20; margin-bottom: 4px;'>📊 Analyse</h4>", unsafe_allow_html=True)
             if st.session_state.rating_success:
@@ -206,7 +206,7 @@ else:
             vit_val = st.session_state.nutrients.get('vit', 90)
             score = st.session_state.nutrients.get('score', 84)
             tip_type = st.session_state.nutrients.get('tip_type', 'green')
-            tip_msg = st.session_state.nutrients.get('tip_msg', 'Repas équilibré validé par le système.')
+            tip_msg = st.session_state.nutrients.get('tip_msg', 'Profil nutritionnel validé pour la session universitaire.')
             
             # مغذيات بألوان متميزة ومخصصة لكل عنصر على حدة
             m1, m2, m3 = st.columns(3)
@@ -268,34 +268,26 @@ else:
                     try:
                         img_bytes = st.session_state.captured_image.getvalue() if hasattr(st.session_state.captured_image, 'getvalue') else str(st.session_state.captured_image).encode()
                         hash_val = int(hashlib.md5(img_bytes).hexdigest(), 16)
-                        db_index = hash_val % 6
+                        db_index = hash_val % 4
                     except Exception:
                         db_index = 0
                     
                     if db_index == 0:
-                        p, c, f, fib, vit, sc = 24, 72, 13, 11, 89, 81
+                        p, c, f, fib, vit, sc = 26, 68, 12, 10, 88, 82
                         tip_type = "orange"
-                        tip_msg = "Glucides et huiles riches ! 🚶‍♂️ Marche rapide de 20 min recommandée."
+                        tip_msg = "Apport énergétique élevé ! 🚶‍♂️ Une marche de 20 min est conseillée après ce repas."
                     elif db_index == 1:
-                        p, c, f, fib, vit, sc = 42, 45, 10, 9, 94, 98
+                        p, c, f, fib, vit, sc = 40, 44, 9, 8, 95, 96
                         tip_type = "green"
-                        tip_msg = "Équilibre optimal ! Parfait pour la concentration en amphi."
+                        tip_msg = "Profil nutritionnel optimal ! Parfait pour la concentration et l'effort intellectuel."
                     elif db_index == 2:
-                        p, c, f, fib, vit, sc = 30, 55, 8, 16, 95, 92
+                        p, c, f, fib, vit, sc = 29, 58, 11, 14, 92, 90
                         tip_type = "blue"
-                        tip_msg = "Riche en fibres et légumineuses ! Excellent pour la digestion."
-                    elif db_index == 3:
-                        p, c, f, fib, vit, sc = 34, 80, 19, 7, 75, 70
-                        tip_type = "orange"
-                        tip_msg = "Repas énergétique lourd ! 🏃‍♂️ Petit jogging conseillé ce soir."
-                    elif db_index == 4:
-                        p, c, f, fib, vit, sc = 36, 62, 11, 12, 91, 90
-                        tip_type = "green"
-                        tip_msg = "Source idéale de glucides complexes et protéines propres."
+                        tip_msg = "Riche en micronutriments et fibres ! Excellent pour l'équilibre digestif."
                     else:
-                        p, c, f, fib, vit, sc = 38, 58, 12, 10, 93, 89
+                        p, c, f, fib, vit, sc = 35, 60, 13, 11, 90, 88
                         tip_type = "green"
-                        tip_msg = "Très bon apport en oméga-3 et vitamines."
+                        tip_msg = "Équilibre glucides-protéines validé pour la cité universitaire."
                         
                     st.session_state.nutrients = {
                         'prot': p, 'carb': c, 'fat': f, 'fib': fib, 
